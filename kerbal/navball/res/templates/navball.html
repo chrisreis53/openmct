@@ -1,0 +1,29 @@
+<h1>TEST of NAVBALL</h1>
+<div ng-controller="navballController">
+  <div>
+    <a ng-click="setVisibility(true)">All</a>
+    <a ng-click="setVisibility(false,false)">Incomplete</a>
+    <a ng-click="setVisibility(false, true)">Complete</a>
+    <button ng-click="addTask()">Huzzah</button>
+  </div>
+  <ul >
+    <li ng-repeat="number in [ 1, 2, 3]">
+        {{ number }}
+    </li>
+  </ul>
+
+  <div id="navball"><navball-directive></navball-directive></div>
+
+  <ul>
+    <li ng-repeat="task in model.tasks" ng-if="showTask(task)">
+      <input type="checkbox" ng-checked="task.completed" ng-click="toggleCompletion($index)">
+          {{ task.discription }}
+    </li>
+  </ul>
+  <ul>
+    <div ng-repeat="telemetryObject in telemetryObjects">
+        {{telemetryObject.name}}
+    </div>
+  </ul>
+
+</div>

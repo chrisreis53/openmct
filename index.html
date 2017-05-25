@@ -30,18 +30,20 @@
     <script>
         var THIRTY_MINUTES = 30 * 60 * 1000;
 
-        require(['openmct','./kerbal/kerbal_telemetry/bundle'], function (openmct) {
+        require(['openmct','./kerbal/kerbal_telemetry/bundle','./kerbal/navball/bundle','./kerbal/todo/bundle'], function (openmct) {
             [
                 'example/imagery',
                 'example/eventGenerator',
                 'example/styleguide',
-                'kerbal/kerbal_telemetry'
+                'kerbal/kerbal_telemetry',
+                'kerbal/navball',
+                'kerbal/todo'
             ].forEach(
                 openmct.legacyRegistry.enable.bind(openmct.legacyRegistry)
             );
-            openmct.install(openmct.plugins.CouchDB('http://192.168.1.4:5984/openmct'));
+            //openmct.install(openmct.plugins.CouchDB('http://192.168.1.4:5984/openmct'));
             openmct.install(openmct.plugins.MyItems());
-            //openmct.install(openmct.plugins.LocalStorage());
+            openmct.install(openmct.plugins.LocalStorage());
             openmct.install(openmct.plugins.Espresso());
             openmct.install(openmct.plugins.Generator());
             openmct.install(openmct.plugins.UTCTimeSystem());

@@ -9,21 +9,21 @@ define(
         function navballDirective($scope) {
             // Build up a template from example extensions
             var template;
-
-            template += "<ul>";
-            template += "<li id=\"test\">";
-            template += "Lolz";
-            template += "</li>";
-            template += "<li>";
-            template += "Test";
-            template += "</li>";
-            template += "</ul>";
-
             return {
-              restrict: 'E',
+              restrict: 'EA',
+              scope: true,
+              bindToController: true,
               template: template,
-              link: function postLink($scope, elem, attr){
+              link: function($scope, elem, attr){
+
+                console.log($scope.heading);
+                console.log("test");
+
+
                 var camera, scene, renderer, container, ball, cyl;
+                var previous_hdg = 0,
+                    previous_pitch = 0,
+                    previous_roll = 0;
 
                 // rotation vectors
                 var X = new THREE.Vector3 (1,0,0);
@@ -35,9 +35,15 @@ define(
                 }
 
                 setInterval (function () {
-                  var X_val = 0.001 * Math.PI * Math.random();
-                  var Y_val = 0.001 * Math.PI * Math.random();
-                  var Z_val = 0.001 * Math.PI * Math.random();
+                  //var X_val = 0.001 * Math.PI * Math.random();
+                  var X_val = 1 * ($scope.heading - previous_hdg);
+                  previous_hdg = $scope.heading;
+                  //var Y_val = 0.001 * Math.PI * Math.random();
+                  var Y_val = 1 * ($scope.roll - previous_roll);
+                  previous_pitch = $scope.pitch;
+                  //var Z_val = 0.001 * Math.PI * Math.random();
+                  var Z_val = 1 * ($scope.pitch - previous_pitch);
+                  previous_roll = $scope.roll;
                   ball.rotateOnAxis(X, X_val);
                   ball.rotateOnAxis(Y, Y_val);
                   ball.rotateOnAxis(Z, Z_val);
@@ -98,6 +104,8 @@ define(
                 {
                   requestAnimationFrame( animate );
                 	renderer.render(scene, camera);
+                  //$scope.variables.heading();
+                  $scope.variables.info();
                 };
 
                 init();

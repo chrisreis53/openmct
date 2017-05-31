@@ -23,6 +23,6 @@
     "lodash": "3.10.1",
     "almond": "~0.3.2",
     "html2canvas": "^0.4.1",
-    "threejs": "*"
+    "threejs": "r84"
   }
 }

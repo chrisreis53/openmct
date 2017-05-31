@@ -1,9 +1,15 @@
 define(function () {
-    function navballController($scope, telemetryHandler) {
-        var showAll = true,
-            showCompleted;
-        var camera, scene, renderer, container;
-        var initialized = true;
+    function navballController($scope,telemetryHandler) {
+      var handle;
+      // Use the telemetryHandler to get telemetry objects here
+      handle = telemetryHandler.handle($scope.domainObject, function () {
+          $scope.telemetryObjects = handle.getTelemetryObjects();
+      });
+
+      // Add min/max defaults
+      $scope.heading = 0.001;
+      $scope.pitch = 0;
+      $scope.roll = 0;
 
         // Persist changes made to a domain object's model
         function persist() {
@@ -12,71 +18,91 @@ define(function () {
             return persistence && persistence.persist();
         }
 
-        $scope.test = function(){
-          init();
-        }
-
-        $scope.addTask = function(){
-          init();
-          animate();
-        }
-
-        // Use the telemetryHandler to get telemetry objects here
-        handle = telemetryHandler.handle($scope.domainObject, function () {
-            $scope.telemetryObjects = handle.getTelemetryObjects();
-        });
-
         // Release subscriptions when scope is destroyed
         $scope.$on('$destroy', handle.unsubscribe);
 
-        function init(){
-          var SCREEN_WIDTH = 400, SCREEN_HEIGHT = 400;
-          scene = new THREE.Scene();
-          camera = new THREE.PerspectiveCamera(75,1,0.1,1000);
-          //renderer = new THREE.WebGLRenderer();
-          renderer = new THREE.CanvasRenderer();
-          renderer.setSize(SCREEN_WIDTH,SCREEN_HEIGHT);
-          container = document.getElementById( 'ThreeJS' );
-        	container.appendChild( renderer.domElement );
+        // WebGL via THREEJS
+        $scope.threejs = {
+            width:400,
+            height:400,
+            scene: null,
+            camera: null,
+            renderer: null,
+            container: null,
+            box:null,
+            initialize: function()
+            {
+                this.scene = new THREE.Scene();
+                this.camera = new THREE.PerspectiveCamera(75, this.width/this.height, 0.1, 100);
+                this.renderer = new THREE.WebGLRenderer();
 
-          var cubeGeometry = new THREE.CubeGeometry( 100, 100, 100 );
-        	var cubeMaterial = new THREE.MeshNormalMaterial();
-        	var cube = new THREE.Mesh( cubeGeometry, cubeMaterial );
-        	cube.position.set(0,50.1,0);
-        	cube.name = "Cube";
-        	scene.add(cube);
+                this.renderer.setSize(this.width, this.height);
+                container = document.getElementById( 'navball' );
+                container.appendChild( this.renderer.domElement );
+                //document.body.appendChild(this.renderer.domElement);
 
-          // LIGHT
-        	var light = new THREE.PointLight(0xffffff);
-        	light.position.set(0,250,0);
-        	scene.add(light);
+                // Create a Spinning Cube
+                var geom = new THREE.BoxGeometry(1,1,1);
+                var material = new THREE.MeshLambertMaterial({color:'blue'});
+
+                this.box = new THREE.Mesh(geom, material);
+
+                this.scene.add(this.box);
+
+                this.camera.position.z = 5;
+            },
+            render: function()
+            {
+                requestAnimationFrame(this.render.bind(this));
+
+                this.box.rotation.x += 0.1;
+                this.box.rotation.y += 0.1;
+
+                this.renderer.render(this.scene, this.camera);
+            }
         };
 
-        function animate()
-        {
-          requestAnimationFrame( animate );
-        	renderer.render(scene, camera);
+        $scope.variables = {
+          heading: function(){
+            if(handle){
+              console.log("varialble heading test");
+              for(var telemetryObject in handle.getTelemetryObjects()){
+                console.log($scope.getValue(telemetryObject));
+              };
+            }
+          },
+          info: function(){
+            $scope.telemetryObjects.forEach(recordData);
+          }
+        };
+        // Get values
+        function recordData(telemetryObject) {
+          var id = telemetryObject.getId();
+          var name = handle.getDomainValue(telemetryObject);
+          var datum = handle.getRangeValue(telemetryObject);
+          if(id === "fbdad6e1-dd9b-44cb-895f-4dcb1cacd9d2" && typeof datum !== "undefined"){
+            console.log("HDG: " + id + " " + datum + " " + name);
+            $scope.heading = datum;
+          }
+          if(id === "d9984964-de91-4260-b8f5-93eb845fe0c3" && typeof datum !== "undefined"){
+            console.log("ROL: " + id + " " + datum + " " + name);
+            $scope.roll = datum;
+          }
+          if(id === "c69c06b0-aecb-4b6d-bb9a-fea999784254" && typeof datum !== "undefined"){
+            console.log("PTC: " + id + " " + datum + " " + name);
+            $scope.pitch = datum;
+          }
+          return datum;
         }
 
-        // Change which tasks are visible
-        $scope.setVisibility = function (all, completed) {
-            showAll = all;
-            showCompleted = completed;
-        };
-
-        // Toggle the completion state of a task
-        $scope.toggleCompletion = function (taskIndex) {
-            $scope.domainObject.useCapability('mutation', function (model) {
-                var task = model.tasks[taskIndex];
-                task.completed = !task.completed;
-            });
-            persist();
-        };
-
-        // Check whether a task should be visible
-        $scope.showTask = function (task) {
-            return showAll || (showCompleted === !!(task.completed));
-        };
+        // Get values
+        $scope.getValue = function (telemetryObject) {
+          var id = telemetryObject.getId();
+          var name = handle.getDomainValue(telemetryObject);
+          var datum = handle.getRangeValue(telemetryObject);
+          //console.log(id + " " + datum + " " + name);
+          return datum;
+        }
 
     }
 

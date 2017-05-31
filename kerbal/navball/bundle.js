@@ -2,12 +2,10 @@ define([
   'openmct',
   './src/controllers/navballController',
   './src/directives/navballDirective',
-  "text!./res/templates/navball.html"
 ], function(
     openmct,
     navballController,
     navballDirective,
-    navballTemplate
 ) {
 
   openmct.legacyRegistry.register("kerbal/navball", {
@@ -30,7 +28,7 @@ define([
         "needs":[ "telemetry" ],
         "delegation": true,
         "name": "Navball",
-        "template": navballTemplate,
+        "templateUrl": "templates/navball.html",
         "editable": true
       }],
       "controllers": [{
@@ -41,7 +39,7 @@ define([
       "directives": [{
         "key": "navballDirective",
         "implementation": navballDirective,
-        "depends": [ "$scope" ]
+        "depends": [ ]
       }],
       "gestures": [ "drag","menu" ]
     }

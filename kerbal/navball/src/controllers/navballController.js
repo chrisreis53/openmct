@@ -80,16 +80,16 @@ define(function () {
           var id = telemetryObject.getId();
           var name = handle.getDomainValue(telemetryObject);
           var datum = handle.getRangeValue(telemetryObject);
-          if(id === "fbdad6e1-dd9b-44cb-895f-4dcb1cacd9d2" && typeof datum !== "undefined"){
-            console.log("HDG: " + id + " " + datum + " " + name);
+          if(id === "example_tlm:N.HEADING2" && typeof datum !== "undefined"){
+            //console.log("HDG: " + id + " " + datum + " " + name);
             $scope.heading = datum;
           }
-          if(id === "d9984964-de91-4260-b8f5-93eb845fe0c3" && typeof datum !== "undefined"){
-            console.log("ROL: " + id + " " + datum + " " + name);
+          if(id === "example_tlm:N.ROLL2" && typeof datum !== "undefined"){
+            //console.log("ROL: " + id + " " + datum + " " + name);
             $scope.roll = datum;
           }
-          if(id === "c69c06b0-aecb-4b6d-bb9a-fea999784254" && typeof datum !== "undefined"){
-            console.log("PTC: " + id + " " + datum + " " + name);
+          if(id === "example_tlm:N.PITCH2" && typeof datum !== "undefined"){
+            //console.log("PTC: " + id + " " + datum + " " + name);
             $scope.pitch = datum;
           }
           return datum;

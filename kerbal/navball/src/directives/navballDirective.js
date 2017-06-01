@@ -19,9 +19,12 @@ define(
                 console.log($scope.heading);
                 console.log("test");
 
+                function dr (deg) {
+                  return deg*(Math.PI/180);
+                }
 
                 var camera, scene, renderer, container, ball, cyl;
-                var previous_hdg = 0,
+                var previous_hdg = 270,
                     previous_pitch = 0,
                     previous_roll = 0;
 
@@ -30,24 +33,20 @@ define(
                 var Y = new THREE.Vector3 (0,1,0);
                 var Z = new THREE.Vector3 (0,0,1);
 
-                function dr (deg) {
-                  return deg*(Math.PI/180);
-                }
-
                 setInterval (function () {
                   //var X_val = 0.001 * Math.PI * Math.random();
-                  var X_val = 1 * ($scope.heading - previous_hdg);
+                  var Y_val = -1 * dr(($scope.heading - previous_hdg));
                   previous_hdg = $scope.heading;
                   //var Y_val = 0.001 * Math.PI * Math.random();
-                  var Y_val = 1 * ($scope.roll - previous_roll);
+                  var X_val = dr(-1 * ($scope.pitch - previous_pitch));
                   previous_pitch = $scope.pitch;
                   //var Z_val = 0.001 * Math.PI * Math.random();
-                  var Z_val = 1 * ($scope.pitch - previous_pitch);
+                  var Z_val = dr(1 * ($scope.roll - previous_roll));
                   previous_roll = $scope.roll;
-                  ball.rotateOnAxis(X, X_val);
                   ball.rotateOnAxis(Y, Y_val);
+                  ball.rotateOnAxis(X, X_val);
                   ball.rotateOnAxis(Z, Z_val);
-                  cyl.rotateOnAxis(Y, Z_val );
+                  cyl.rotateOnAxis(Y, Y_val );
                 },100);
 
                 function init(){

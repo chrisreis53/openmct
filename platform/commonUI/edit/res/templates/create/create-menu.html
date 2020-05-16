@@ -1,5 +1,5 @@
 <!--
- Open MCT, Copyright (c) 2014-2017, United States Government
+ Open MCT, Copyright (c) 2014-2018, United States Government
  as represented by the Administrator of the National Aeronautics and Space
  Administration. All rights reserved.
 
@@ -19,8 +19,8 @@
  this source code distribution or the Licensing information page available
  at runtime from the About dialog for additional information.
 -->
-<div class="contents" ng-controller="CreateMenuController">
-    <div class="pane left menu-items">
+<div class="w-menu" ng-controller="CreateMenuController">
+    <div class="col menu-items">
         <ul>
             <li ng-repeat="createAction in createActions" ng-click="createAction.perform()">
                 <a ng-mouseover="representation.activeMetadata = createAction.getMetadata()"
@@ -31,13 +31,15 @@
             </li>
         </ul>
     </div>
-    <div class="pane right menu-item-description">
+    <div class="col menu-item-description">
         <div class="desc-area icon {{ representation.activeMetadata.cssClass }}"></div>
-        <div class="desc-area title">
-            {{representation.activeMetadata.name}}
-        </div>
-        <div class="desc-area description">
-            {{representation.activeMetadata.description}}
+        <div class="w-title-desc">
+            <div class="desc-area title">
+                {{representation.activeMetadata.name}}
+            </div>
+            <div class="desc-area description">
+                {{representation.activeMetadata.description}}
+            </div>
         </div>
     </div>
 </div>

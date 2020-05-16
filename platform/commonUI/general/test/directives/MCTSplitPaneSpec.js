@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -25,20 +25,21 @@ define(
     function (MCTSplitPane) {
 
         var JQLITE_METHODS = [
-                'on',
-                'addClass',
-                'children',
-                'eq',
-                'toggleClass',
-                'css'
-            ];
+            'on',
+            'addClass',
+            'children',
+            'eq',
+            'toggleClass',
+            'css'
+        ];
 
         describe("The mct-split-pane directive", function () {
             var mockParse,
                 mockLog,
                 mockInterval,
                 mockParsed,
-                mctSplitPane;
+                mctSplitPane,
+                mockWindow = {};
 
             beforeEach(function () {
                 mockParse = jasmine.createSpy('$parse');
@@ -48,13 +49,23 @@ define(
                 mockInterval.cancel = jasmine.createSpy('mockCancel');
                 mockParsed = jasmine.createSpy('parsed');
                 mockParsed.assign = jasmine.createSpy('assign');
+                mockParse.and.returnValue(mockParsed);
 
-                mockParse.andReturn(mockParsed);
+                mockWindow.localStorage =  {
+                    store: {},
+                    setItem: function (key, value) {
+                        this.store[key] = value;
+                    },
+                    getItem: function (key) {
+                        return this.store[key];
+                    }
+                };
 
                 mctSplitPane = new MCTSplitPane(
                     mockParse,
                     mockLog,
-                    mockInterval
+                    mockInterval,
+                    mockWindow
                 );
             });
 
@@ -73,7 +84,7 @@ define(
                     controller;
 
                 function fireOn(eventType) {
-                    mockScope.$on.calls.forEach(function (call) {
+                    mockScope.$on.calls.all().forEach(function (call) {
                         if (call.args[0] === eventType) {
                             call.args[1]();
                         }
@@ -85,7 +96,7 @@ define(
                         jasmine.createSpyObj('$scope', ['$apply', '$watch', '$on']);
                     mockElement =
                         jasmine.createSpyObj('element', JQLITE_METHODS);
-                    testAttrs = {};
+                    testAttrs = {alias: 'rightSide'};
                     mockChildren =
                         jasmine.createSpyObj('children', JQLITE_METHODS);
                     mockFirstPane =
@@ -95,12 +106,12 @@ define(
                     mockSecondPane =
                         jasmine.createSpyObj('secondPane', JQLITE_METHODS);
 
-                    mockElement.children.andReturn(mockChildren);
+                    mockElement.children.and.returnValue(mockChildren);
                     mockElement[0] = {
                         offsetWidth: 12321,
                         offsetHeight: 45654
                     };
-                    mockChildren.eq.andCallFake(function (i) {
+                    mockChildren.eq.and.callFake(function (i) {
                         return [mockFirstPane, mockSplitter, mockSecondPane][i];
                     });
                     mockFirstPane[0] = { offsetWidth: 123, offsetHeight: 456 };
@@ -124,12 +135,12 @@ define(
                 });
 
                 it("sets an interval which does not trigger digests", function () {
-                    expect(mockInterval.mostRecentCall.args[3]).toBe(false);
+                    expect(mockInterval.calls.mostRecent().args[3]).toBe(false);
                 });
 
                 it("exposes its splitter's initial position", function () {
                     expect(controller.position()).toEqual(
-                        mockFirstPane[0].offsetWidth + mockSplitter[0].offsetWidth
+                        mockFirstPane[0].offsetWidth
                     );
                 });
 
@@ -142,10 +153,14 @@ define(
                     });
                 });
 
-                it("allows classes to be toggled on contained elements", function () {
-                    controller.toggleClass('resizing');
-                    expect(mockChildren.toggleClass)
-                        .toHaveBeenCalledWith('resizing');
+                it("applies resizing class to children when resizing", function () {
+                    controller.startResizing();
+                    expect(mockChildren.toggleClass).toHaveBeenCalledWith('resizing');
+                });
+
+                it("removes resizing class from children when resizing action ends", function () {
+                    controller.endResizing(0);
+                    expect(mockChildren.toggleClass).toHaveBeenCalledWith('resizing');
                 });
 
                 it("allows positions to be set", function () {
@@ -153,7 +168,7 @@ define(
                     controller.position(testValue);
                     expect(mockFirstPane.css).toHaveBeenCalledWith(
                         'width',
-                        (testValue - mockSplitter[0].offsetWidth) + 'px'
+                        (testValue) + 'px'
                     );
                 });
 
@@ -185,11 +200,11 @@ define(
                     mockFirstPane[0].offsetWidth += 100;
                     // Should not reflect the change yet
                     expect(controller.position()).not.toEqual(
-                        mockFirstPane[0].offsetWidth + mockSplitter[0].offsetWidth
+                        mockFirstPane[0].offsetWidth
                     );
-                    mockInterval.mostRecentCall.args[0]();
+                    mockInterval.calls.mostRecent().args[0]();
                     expect(controller.position()).toEqual(
-                        mockFirstPane[0].offsetWidth + mockSplitter[0].offsetWidth
+                        mockFirstPane[0].offsetWidth
                     );
                 });
 
@@ -198,6 +213,12 @@ define(
                     fireOn('$destroy');
                     expect(mockInterval.cancel).toHaveBeenCalled();
                 });
+
+                it("saves user preference to localStorage when user is done resizing", function () {
+                    controller.endResizing(100);
+                    expect(Number(mockWindow.localStorage.getItem('mctSplitPane-rightSide'))).toEqual(100);
+                });
+
             });
 
         });

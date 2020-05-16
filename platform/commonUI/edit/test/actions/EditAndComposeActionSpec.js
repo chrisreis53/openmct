@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -25,8 +25,7 @@ define(
     function (EditAndComposeAction) {
 
         describe("The Link action", function () {
-            var mockQ,
-                mockDomainObject,
+            var mockDomainObject,
                 mockParent,
                 mockContext,
                 mockComposition,
@@ -47,13 +46,10 @@ define(
             }
 
             beforeEach(function () {
-
-
                 mockDomainObject = jasmine.createSpyObj(
                     "domainObject",
                     ["getId", "getCapability"]
                 );
-                mockQ = { when: mockPromise };
                 mockParent = {
                     getModel: function () {
                         return model;
@@ -71,14 +67,14 @@ define(
                 mockActionCapability = jasmine.createSpyObj("actionCapability", ["getActions"]);
                 mockEditAction = jasmine.createSpyObj("editAction", ["perform"]);
 
-                mockDomainObject.getId.andReturn("test");
-                mockDomainObject.getCapability.andReturn(mockContext);
-                mockContext.getParent.andReturn(mockParent);
-                mockType.hasFeature.andReturn(true);
-                mockType.getKey.andReturn("layout");
-                mockComposition.invoke.andReturn(mockPromise(true));
-                mockComposition.add.andReturn(mockPromise(true));
-                mockActionCapability.getActions.andReturn([]);
+                mockDomainObject.getId.and.returnValue("test");
+                mockDomainObject.getCapability.and.returnValue(mockContext);
+                mockContext.getParent.and.returnValue(mockParent);
+                mockType.hasFeature.and.returnValue(true);
+                mockType.getKey.and.returnValue("layout");
+                mockComposition.invoke.and.returnValue(mockPromise(true));
+                mockComposition.add.and.returnValue(mockPromise(true));
+                mockActionCapability.getActions.and.returnValue([]);
 
                 capabilities = {
                     composition: mockComposition,
@@ -105,14 +101,14 @@ define(
             });
 
             it("enables edit mode for objects that have an edit action", function () {
-                mockActionCapability.getActions.andReturn([mockEditAction]);
+                mockActionCapability.getActions.and.returnValue([mockEditAction]);
                 action.perform();
                 expect(mockEditAction.perform).toHaveBeenCalled();
             });
 
             it("Does not enable edit mode for objects that do not have an" +
                 " edit action", function () {
-                mockActionCapability.getActions.andReturn([]);
+                mockActionCapability.getActions.and.returnValue([]);
                 action.perform();
                 expect(mockEditAction.perform).not.toHaveBeenCalled();
                 expect(mockComposition.add)

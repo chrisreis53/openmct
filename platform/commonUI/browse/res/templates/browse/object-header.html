@@ -1,5 +1,5 @@
 <!--
- Open MCT, Copyright (c) 2014-2017, United States Government
+ Open MCT, Copyright (c) 2014-2018, United States Government
  as represented by the Administrator of the National Aeronautics and Space
  Administration. All rights reserved.
 
@@ -20,16 +20,16 @@
  at runtime from the About dialog for additional information.
 -->
 <span class='type-icon flex-elem {{type.getCssClass()}}'></span>
-<span class="l-elem-wrapper l-flex-row flex-elem grows">
+<span class="l-elem-wrapper l-flex-row flex-elem grows" ng-controller="ObjectHeaderController as controller">
     <span ng-if="parameters.mode" class='action flex-elem'>{{parameters.mode}}</span>
-    <span class='title-label flex-elem holder flex-can-shrink'>{{model.name}}</span>
+    <span ng-attr-contenteditable="{{ controller.editable ? true : undefined }}"
+		class='title-label flex-elem holder flex-can-shrink s-input-inline'
+		ng-click="controller.edit()"
+		ng-blur="controller.updateName($event)"
+		ng-keypress="controller.updateName($event)">{{model.name}}</span>
     <span class='t-object-alert t-alert-unsynced flex-elem holder' title='This object is not currently displaying real-time data'></span>
     <mct-representation
         key="'menu-arrow'"
         mct-object='domainObject'
         class="flex-elem context-available-w"></mct-representation>
 </span>
-<a class="s-button icon-expand t-btn-view-large"
-   title="View large"
-   mct-trigger-modal>
-</a>

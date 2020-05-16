@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -34,6 +34,7 @@ define(
                 mockUnsubscribe,
                 telemetry,
                 mockTelemetryAPI,
+                mockMetadata,
                 mockAPI;
 
             function mockPromise(value) {
@@ -62,13 +63,13 @@ define(
                 mockReject = jasmine.createSpyObj("reject", ["then"]);
                 mockUnsubscribe = jasmine.createSpy("unsubscribe");
 
-                mockInjector.get.andReturn(mockTelemetryService);
+                mockInjector.get.and.returnValue(mockTelemetryService);
 
-                mockQ.when.andCallFake(mockPromise);
-                mockQ.reject.andReturn(mockReject);
+                mockQ.when.and.callFake(mockPromise);
+                mockQ.reject.and.returnValue(mockReject);
 
-                mockDomainObject.getId.andReturn("testId");
-                mockDomainObject.getModel.andReturn({
+                mockDomainObject.getId.and.returnValue("testId");
+                mockDomainObject.getModel.and.returnValue({
                     telemetry: {
                         source: "testSource",
                         key: "testKey"
@@ -76,12 +77,12 @@ define(
                 });
 
                 mockTelemetryService.requestTelemetry
-                    .andReturn(mockPromise({}));
+                    .and.returnValue(mockPromise({}));
                 mockTelemetryService.subscribe
-                    .andReturn(mockUnsubscribe);
+                    .and.returnValue(mockUnsubscribe);
 
                 // Bubble up...
-                mockReject.then.andReturn(mockReject);
+                mockReject.then.and.returnValue(mockReject);
 
                 mockTelemetryAPI = jasmine.createSpyObj("telemetryAPI", [
                     "getMetadata",
@@ -90,11 +91,22 @@ define(
                     "findRequestProvider",
                     "findSubscriptionProvider"
                 ]);
-                mockTelemetryAPI.getMetadata.andReturn({
-                    valuesForHints: function () {
-                        return [{}];
-                    }
+
+                mockMetadata = jasmine.createSpyObj('telemetryMetadata', [
+                    'valuesForHints',
+                    'values'
+                ]);
+
+                mockMetadata.valuesForHints.and.callFake(function (hints) {
+                    var hint = hints[0];
+                    var metadatum = {
+                        key: 'default' + hint
+                    };
+                    metadatum[hint] = "foo";
+                    return [metadatum];
                 });
+
+                mockTelemetryAPI.getMetadata.and.returnValue(mockMetadata);
 
                 mockAPI = {
                     telemetry: mockTelemetryAPI,
@@ -147,13 +159,15 @@ define(
                         source: "testSource", // from model
                         key: "testKey", // from model
                         start: 42, // from argument
-                        domain: 'mockTimeSystem'
+                        domain: 'mockTimeSystem',
+                        domains: [{ domain: "foo", key: 'defaultdomain' }],
+                        ranges: [{ range: "foo", key: 'defaultrange' }]
                     }]);
             });
 
             it("provides an empty series when telemetry is missing", function () {
                 var series;
-                mockTelemetryService.requestTelemetry.andReturn(mockPromise({}));
+                mockTelemetryService.requestTelemetry.and.returnValue(mockPromise({}));
                 telemetry.requestData({}).then(function (s) {
                     series = s;
                 });
@@ -167,13 +181,15 @@ define(
                     key: "testKey",
                     start: 0,
                     end: 1,
-                    domain: 'mockTimeSystem'
+                    domain: 'mockTimeSystem',
+                    domains: [{ domain: "foo", key: 'defaultdomain' }],
+                    ranges: [{ range: "foo", key: 'defaultrange' }]
                 });
             });
 
             it("uses domain object as a key if needed", function () {
                 // Don't include key in telemetry
-                mockDomainObject.getModel.andReturn({
+                mockDomainObject.getModel.and.returnValue({
                     telemetry: { source: "testSource" }
                 });
 
@@ -184,13 +200,15 @@ define(
                     key: "testId", // from domain object
                     start: 0,
                     end: 1,
-                    domain: 'mockTimeSystem'
+                    domain: 'mockTimeSystem',
+                    domains: [{ domain: "foo", key: 'defaultdomain' }],
+                    ranges: [{ range: "foo", key: 'defaultrange' }]
                 });
             });
 
 
             it("warns if no telemetry service can be injected", function () {
-                mockInjector.get.andCallFake(function () {
+                mockInjector.get.and.callFake(function () {
                     throw "";
                 });
 
@@ -199,19 +217,19 @@ define(
 
                 telemetry.requestData();
 
-                expect(mockLog.warn).toHaveBeenCalled();
+                expect(mockLog.info).toHaveBeenCalled();
             });
 
             it("if a new style telemetry source is available, use it", function () {
                 var mockProvider = {};
-                mockTelemetryAPI.findSubscriptionProvider.andReturn(mockProvider);
+                mockTelemetryAPI.findSubscriptionProvider.and.returnValue(mockProvider);
                 telemetry.subscribe(noop, {});
                 expect(mockTelemetryService.subscribe).not.toHaveBeenCalled();
                 expect(mockTelemetryAPI.subscribe).toHaveBeenCalled();
             });
 
             it("if a new style telemetry source is not available, revert to old API", function () {
-                mockTelemetryAPI.findSubscriptionProvider.andReturn(undefined);
+                mockTelemetryAPI.findSubscriptionProvider.and.returnValue(undefined);
                 telemetry.subscribe(noop, {});
                 expect(mockTelemetryAPI.subscribe).not.toHaveBeenCalled();
                 expect(mockTelemetryService.subscribe).toHaveBeenCalled();
@@ -230,25 +248,44 @@ define(
                     prop3: "val6"
                 }];
                 var mockProvider = {};
-                var dunzo = false;
 
-                mockTelemetryAPI.findRequestProvider.andReturn(mockProvider);
-                mockTelemetryAPI.request.andReturn(Promise.resolve(mockTelemetry));
+                mockMetadata.values.and.returnValue([
+                    {
+                        key: 'defaultrange',
+                        source: 'prop1'
+                    },
+                    {
+                        key: 'defaultdomain',
+                        source: 'prop2'
+                    },
+                    {
+                        key: 'prop3',
+                        source: 'prop3'
+                    }
+                ]);
 
-                telemetry.requestData({}).then(function (data) {
+                mockTelemetryAPI.findRequestProvider.and.returnValue(mockProvider);
+                mockTelemetryAPI.request.and.returnValue(Promise.resolve(mockTelemetry));
+
+                return telemetry.requestData({}).then(function (data) {
                     returnedTelemetry = data;
-                    dunzo = true;
-                });
 
-                waitsFor(function () {
-                    return dunzo;
-                });
-
-                runs(function () {
                     expect(returnedTelemetry.getPointCount).toBeDefined();
                     expect(returnedTelemetry.getDomainValue).toBeDefined();
                     expect(returnedTelemetry.getRangeValue).toBeDefined();
                     expect(returnedTelemetry.getPointCount()).toBe(2);
+                    // Default domain + remap should work.
+                    expect(returnedTelemetry.getDomainValue(0)).toBe('val2');
+                    expect(returnedTelemetry.getDomainValue(1)).toBe('val5');
+                    // explicit domain should work
+                    expect(returnedTelemetry.getDomainValue(0, 'prop3')).toBe('val3');
+                    expect(returnedTelemetry.getDomainValue(1, 'prop3')).toBe('val6');
+                    // default range + remap should work
+                    expect(returnedTelemetry.getRangeValue(0)).toBe('val1');
+                    expect(returnedTelemetry.getRangeValue(1)).toBe('val4');
+                    // explicit range should work
+                    expect(returnedTelemetry.getRangeValue(0, 'prop3')).toBe('val3');
+                    expect(returnedTelemetry.getRangeValue(1, 'prop3')).toBe('val6');
                 });
 
             });
@@ -266,13 +303,15 @@ define(
                         key: "testKey",
                         start: 0,
                         end: 1,
-                        domain: 'mockTimeSystem'
+                        domain: 'mockTimeSystem',
+                        domains: [{ domain: "foo", key: "defaultdomain" }],
+                        ranges: [{ range: "foo", key: "defaultrange" }]
                     }]
                 );
 
                 // Check that the callback gets invoked
                 expect(mockCallback).not.toHaveBeenCalled();
-                mockTelemetryService.subscribe.mostRecentCall.args[0]({
+                mockTelemetryService.subscribe.calls.mostRecent().args[0]({
                     testSource: { testKey: { someKey: "some value" } }
                 });
                 expect(mockCallback).toHaveBeenCalledWith(

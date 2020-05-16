@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -22,32 +22,34 @@
 
 define([
     './src/InspectorController',
-    './src/EditableRegionPolicy',
-    'legacyRegistry'
+    './src/EditableRegionPolicy'
 ], function (
     InspectorController,
-    EditableRegionPolicy,
-    legacyRegistry
+    EditableRegionPolicy
 ) {
 
-    legacyRegistry.register("platform/commonUI/regions", {
-        "extensions": {
-            "controllers": [
-                {
-                    "key": "InspectorController",
-                    "implementation": InspectorController,
-                    "depends": [
-                        "$scope",
-                        "policyService"
-                    ]
-                }
-            ],
-            "policies": [
-                {
-                    "category": "region",
-                    "implementation": EditableRegionPolicy
-                }
-            ]
+    return {
+        name:"platform/commonUI/regions",
+        definition: {
+            "extensions": {
+                "controllers": [
+                    {
+                        "key": "InspectorController",
+                        "implementation": InspectorController,
+                        "depends": [
+                            "$scope",
+                            "openmct",
+                            "$document"
+                        ]
+                    }
+                ],
+                "policies": [
+                    {
+                        "category": "region",
+                        "implementation": EditableRegionPolicy
+                    }
+                ]
+            }
         }
-    });
+    };
 });

@@ -1,34 +1,52 @@
 define([
     "./src/ExampleStyleGuideModelProvider",
     "./src/MCTExample",
-    'legacyRegistry'
+    "./res/templates/intro.html",
+    "./res/templates/standards.html",
+    "./res/templates/colors.html",
+    "./res/templates/status.html",
+    "./res/templates/glyphs.html",
+    "./res/templates/controls.html",
+    "./res/templates/input.html",
+    "./res/templates/menus.html"
 ], function (
     ExampleStyleGuideModelProvider,
     MCTExample,
-    legacyRegistry
+    introTemplate,
+    standardsTemplate,
+    colorsTemplate,
+    statusTemplate,
+    glyphsTemplate,
+    controlsTemplate,
+    inputTemplate,
+    menusTemplate
 ) {
-    legacyRegistry.register("example/styleguide", {
-        "name": "Open MCT Style Guide",
-        "description": "Examples and documentation illustrating UI styles in use in Open MCT.",
-        "extensions":
+    return {
+        name:"example/styleguide",
+        definition: {
+            "name": "Open MCT Style Guide",
+            "description": "Examples and documentation illustrating UI styles in use in Open MCT.",
+            "extensions":
         {
             "types": [
                 { "key": "styleguide.intro", "name": "Introduction", "cssClass": "icon-page", "description": "Introduction and overview to the style guide" },
                 { "key": "styleguide.standards", "name": "Standards", "cssClass": "icon-page", "description": "" },
                 { "key": "styleguide.colors", "name": "Colors", "cssClass": "icon-page", "description": "" },
+                { "key": "styleguide.status", "name": "status", "cssClass": "icon-page", "description": "Limits, telemetry paused, etc." },
                 { "key": "styleguide.glyphs", "name": "Glyphs", "cssClass": "icon-page", "description": "Glyphs overview" },
                 { "key": "styleguide.controls", "name": "Controls", "cssClass": "icon-page", "description": "Buttons, selects, HTML controls" },
                 { "key": "styleguide.input", "name": "Text Inputs", "cssClass": "icon-page", "description": "Various text inputs" },
                 { "key": "styleguide.menus", "name": "Menus", "cssClass": "icon-page", "description": "Context menus, dropdowns" }
             ],
             "views": [
-                { "key": "styleguide.intro", "type": "styleguide.intro", "templateUrl": "templates/intro.html", "editable": false },
-                { "key": "styleguide.standards", "type": "styleguide.standards", "templateUrl": "templates/standards.html", "editable": false },
-                { "key": "styleguide.colors", "type": "styleguide.colors", "templateUrl": "templates/colors.html", "editable": false },
-                { "key": "styleguide.glyphs", "type": "styleguide.glyphs", "templateUrl": "templates/glyphs.html", "editable": false },
-                { "key": "styleguide.controls", "type": "styleguide.controls", "templateUrl": "templates/controls.html", "editable": false },
-                { "key": "styleguide.input", "type": "styleguide.input", "templateUrl": "templates/input.html", "editable": false },
-                { "key": "styleguide.menus", "type": "styleguide.menus", "templateUrl": "templates/menus.html", "editable": false }
+                { "key": "styleguide.intro", "type": "styleguide.intro", "template": introTemplate, "editable": false },
+                { "key": "styleguide.standards", "type": "styleguide.standards", "template": standardsTemplate, "editable": false },
+                { "key": "styleguide.colors", "type": "styleguide.colors", "template": colorsTemplate, "editable": false },
+                { "key": "styleguide.status", "type": "styleguide.status", "template": statusTemplate, "editable": false },
+                { "key": "styleguide.glyphs", "type": "styleguide.glyphs", "template": glyphsTemplate, "editable": false },
+                { "key": "styleguide.controls", "type": "styleguide.controls", "template": controlsTemplate, "editable": false },
+                { "key": "styleguide.input", "type": "styleguide.input", "template": inputTemplate, "editable": false },
+                { "key": "styleguide.menus", "type": "styleguide.menus", "template": menusTemplate, "editable": false }
             ],
             "roots": [
                 {
@@ -47,6 +65,7 @@ define([
                             "intro",
                             "standards",
                             "colors",
+                            "status",
                             "glyphs",
                             "styleguide:ui-elements"
                         ]
@@ -82,17 +101,8 @@ define([
                         "$q"
                     ]
                 }
-            ],
-            "stylesheets": [
-                {
-                    "stylesheetUrl": "css/style-guide-espresso.css",
-                    "theme": "espresso"
-                },
-                {
-                    "stylesheetUrl": "css/style-guide-snow.css",
-                    "theme": "snow"
-                }
             ]
         }
-    });
+        }
+    };
 });

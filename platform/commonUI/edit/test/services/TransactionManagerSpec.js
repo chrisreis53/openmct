@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -44,10 +44,10 @@ define(
                 testId = 'test-id';
                 mockPromise = jasmine.createSpyObj('promise', ['then']);
 
-                mockOnCommit.andReturn(mockPromise);
-                mockOnCancel.andReturn(mockPromise);
+                mockOnCommit.and.returnValue(mockPromise);
+                mockOnCancel.and.returnValue(mockPromise);
 
-                mockTransactionService.addToTransaction.andCallFake(function () {
+                mockTransactionService.addToTransaction.and.callFake(function () {
                     var mockRemove =
                         jasmine.createSpy('remove-' + mockRemoves.length);
                     mockRemoves.push(mockRemove);
@@ -59,7 +59,7 @@ define(
 
             it("delegates isActive calls", function () {
                 [false, true].forEach(function (state) {
-                    mockTransactionService.isActive.andReturn(state);
+                    mockTransactionService.isActive.and.returnValue(state);
                     expect(manager.isActive()).toBe(state);
                 });
             });
@@ -84,33 +84,42 @@ define(
                 it("invokes passed-in callbacks from its own callbacks", function () {
                     expect(mockOnCommit).not.toHaveBeenCalled();
                     mockTransactionService.addToTransaction
-                        .mostRecentCall.args[0]();
+                        .calls.mostRecent().args[0]();
                     expect(mockOnCommit).toHaveBeenCalled();
 
                     expect(mockOnCancel).not.toHaveBeenCalled();
                     mockTransactionService.addToTransaction
-                        .mostRecentCall.args[1]();
+                        .calls.mostRecent().args[1]();
                     expect(mockOnCancel).toHaveBeenCalled();
                 });
 
-                it("ignores subsequent calls for the same object", function () {
-                    manager.addToTransaction(
-                        testId,
-                        jasmine.createSpy(),
-                        jasmine.createSpy()
-                    );
-                    expect(mockTransactionService.addToTransaction.calls.length)
-                        .toEqual(1);
-                });
+                describe("Adds callbacks to transaction", function () {
+                    beforeEach(function () {
+                        spyOn(manager, 'clearTransactionsFor');
+                        manager.clearTransactionsFor.and.callThrough();
+                    });
 
-                it("accepts subsequent calls for other objects", function () {
-                    manager.addToTransaction(
-                        'other-id',
-                        jasmine.createSpy(),
-                        jasmine.createSpy()
-                    );
-                    expect(mockTransactionService.addToTransaction.calls.length)
-                        .toEqual(2);
+                    it("and clears pending calls if same object", function () {
+                        manager.addToTransaction(
+                            testId,
+                            jasmine.createSpy(),
+                            jasmine.createSpy()
+                        );
+                        expect(manager.clearTransactionsFor).toHaveBeenCalledWith(testId);
+                    });
+
+                    it("and does not clear pending calls if different object", function () {
+                        manager.addToTransaction(
+                            'other-id',
+                            jasmine.createSpy(),
+                            jasmine.createSpy()
+                        );
+                        expect(manager.clearTransactionsFor).not.toHaveBeenCalled();
+                    });
+
+                    afterEach(function () {
+                        expect(mockTransactionService.addToTransaction.calls.count()).toEqual(2);
+                    });
                 });
 
                 it("does not remove callbacks from the transaction", function () {

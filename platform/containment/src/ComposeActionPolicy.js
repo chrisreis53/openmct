@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -36,10 +36,11 @@ define(
          * @memberof platform/containment
          * @implements {Policy.<Action, ActionContext>}
          */
-        function ComposeActionPolicy($injector) {
+        function ComposeActionPolicy($injector, openmct) {
             this.getPolicyService = function () {
                 return $injector.get('policyService');
             };
+            this.openmct = openmct;
         }
 
         ComposeActionPolicy.prototype.allowComposition = function (containerObject, selectedObject) {
@@ -49,11 +50,8 @@ define(
 
             // ...and delegate to the composition policy
             return containerObject.getId() !== selectedObject.getId() &&
-                this.policyService.allow(
-                    'composition',
-                    containerObject,
-                    selectedObject
-                );
+                this.openmct.composition.checkPolicy(containerObject.useCapability('adapter'),
+                    selectedObject.useCapability('adapter'));
         };
 
         /**

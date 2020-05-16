@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -43,13 +43,12 @@ define(["../../src/services/NestedTransaction"], function (NestedTransaction) {
 
         describe("when callbacks are added", function () {
             var mockCommit,
-                mockCancel,
-                remove;
+                mockCancel;
 
             beforeEach(function () {
                 mockCommit = jasmine.createSpy('commit');
                 mockCancel = jasmine.createSpy('cancel');
-                remove = nestedTransaction.add(mockCommit, mockCancel);
+                nestedTransaction.add(mockCommit, mockCancel);
             });
 
             it("does not interact with its parent transaction", function () {

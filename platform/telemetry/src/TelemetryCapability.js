@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -25,15 +25,17 @@
  */
 define(
     [
-        '../../../src/api/objects/object-utils'
+        '../../../src/api/objects/object-utils',
+        'lodash'
     ],
     function (
-        objectUtils
+        objectUtils,
+        _
     ) {
 
         var ZERO = function () {
-            return 0;
-        },
+                return 0;
+            },
             EMPTY_SERIES = {
                 getPointCount: ZERO,
                 getDomainValue: ZERO,
@@ -115,9 +117,7 @@ define(
                     return (this.telemetryService =
                         $injector.get("telemetryService"));
                 } catch (e) {
-                    // $injector should throw if telemetryService
-                    // is unavailable or unsatisfiable.
-                    $log.warn("Telemetry service unavailable");
+                    $log.info("Telemetry service unavailable");
                     return (this.telemetryService = null);
                 }
             };
@@ -140,6 +140,11 @@ define(
                 typeRequest = (type && type.getDefinition().telemetry) || {},
                 modelTelemetry = domainObject.getModel().telemetry,
                 fullRequest = Object.create(typeRequest),
+                newObject = objectUtils.toNewFormat(
+                    domainObject.getModel(),
+                    domainObject.getId()
+                ),
+                metadata = this.openmct.telemetry.getMetadata(newObject),
                 bounds,
                 timeSystem;
 
@@ -175,20 +180,34 @@ define(
                 }
             }
 
+            if (!fullRequest.ranges) {
+                fullRequest.ranges = metadata.valuesForHints(['range']);
+            }
+
+            if (!fullRequest.domains) {
+                fullRequest.domains = metadata.valuesForHints(['domain']);
+            }
+
             return fullRequest;
         };
 
+        function asSeries(telemetry, defaultDomain, defaultRange, sourceMap) {
+            function getValue(index, key) {
+                return telemetry[index][sourceMap[key].source];
+            }
 
-        function asSeries(telemetry, defaultDomain, defaultRange) {
             return {
                 getRangeValue: function (index, range) {
-                    return telemetry[index][range || defaultRange];
+                    return getValue(index, range || defaultRange);
                 },
                 getDomainValue: function (index, domain) {
-                    return telemetry[index][domain || defaultDomain];
+                    return getValue(index, domain || defaultDomain);
                 },
                 getPointCount: function () {
                     return telemetry.length;
+                },
+                getData: function () {
+                    return telemetry;
                 }
             };
         }
@@ -212,8 +231,11 @@ define(
             var telemetryAPI = this.openmct.telemetry;
 
             var metadata = telemetryAPI.getMetadata(domainObject);
-            var defaultDomain = metadata.valuesForHints(['domain'])[0].source;
-            var defaultRange = metadata.valuesForHints(['range'])[0].source;
+            var defaultDomain = metadata.valuesForHints(['domain'])[0].key;
+            var defaultRange = metadata.valuesForHints(['range'])[0];
+            defaultRange = defaultRange ? defaultRange.key : undefined;
+
+            var sourceMap = _.indexBy(metadata.values(), 'key');
 
             var isLegacyProvider = telemetryAPI.findRequestProvider(domainObject) ===
                 telemetryAPI.legacyProvider;
@@ -238,7 +260,7 @@ define(
                     requestTelemetryFromService().then(getRelevantResponse);
             } else {
                 return telemetryAPI.request(domainObject, fullRequest).then(function (telemetry) {
-                    return asSeries(telemetry, defaultDomain, defaultRange);
+                    return asSeries(telemetry, defaultDomain, defaultRange, sourceMap);
                 });
             }
         };
@@ -274,14 +296,17 @@ define(
             var telemetryAPI = this.openmct.telemetry;
 
             var metadata = telemetryAPI.getMetadata(domainObject);
-            var defaultDomain = metadata.valuesForHints(['domain'])[0].source;
-            var defaultRange = metadata.valuesForHints(['range'])[0].source;
+            var defaultDomain = metadata.valuesForHints(['domain'])[0].key;
+            var defaultRange = metadata.valuesForHints(['range'])[0];
+            defaultRange = defaultRange ? defaultRange.key : undefined;
+
+            var sourceMap = _.indexBy(metadata.values(), 'key');
 
             var isLegacyProvider = telemetryAPI.findSubscriptionProvider(domainObject) ===
                 telemetryAPI.legacyProvider;
 
             function update(telemetry) {
-                callback(asSeries([telemetry], defaultDomain, defaultRange));
+                callback(asSeries([telemetry], defaultDomain, defaultRange, sourceMap));
             }
 
             // Unpack the relevant telemetry series
@@ -314,4 +339,3 @@ define(
         return TelemetryCapability;
     }
 );
-

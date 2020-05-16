@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -24,11 +24,10 @@ define([
     "./src/gestures/InfoGesture",
     "./src/gestures/InfoButtonGesture",
     "./src/services/InfoService",
-    "text!./res/info-table.html",
-    "text!./res/info-bubble.html",
-    "text!./res/bubble.html",
-    "text!./res/templates/info-button.html",
-    'legacyRegistry'
+    "./res/info-table.html",
+    "./res/info-bubble.html",
+    "./res/bubble.html",
+    "./res/templates/info-button.html"
 ], function (
     InfoGesture,
     InfoButtonGesture,
@@ -36,81 +35,83 @@ define([
     infoTableTemplate,
     infoBubbleTemplate,
     bubbleTemplate,
-    infoButtonTemplate,
-    legacyRegistry
+    infoButtonTemplate
 ) {
 
-    legacyRegistry.register("platform/commonUI/inspect", {
-        "extensions": {
-            "templates": [
-                {
-                    "key": "info-table",
-                    "template": infoTableTemplate
-                },
-                {
-                    "key": "info-bubble",
-                    "template": infoBubbleTemplate
-                }
-            ],
-            "containers": [
-                {
-                    "key": "bubble",
-                    "template": bubbleTemplate,
-                    "attributes": [
-                        "bubbleTitle",
-                        "bubbleLayout"
-                    ],
-                    "alias": "bubble"
-                }
-            ],
-            "gestures": [
-                {
-                    "key": "info",
-                    "implementation": InfoGesture,
-                    "depends": [
-                        "$timeout",
-                        "agentService",
-                        "infoService",
-                        "INFO_HOVER_DELAY"
-                    ]
-                },
-                {
-                    "key": "infobutton",
-                    "implementation": InfoButtonGesture,
-                    "depends": [
-                        "$document",
-                        "agentService",
-                        "infoService"
-                    ]
-                }
-            ],
-            "services": [
-                {
-                    "key": "infoService",
-                    "implementation": InfoService,
-                    "depends": [
-                        "$compile",
-                        "$rootScope",
-                        "popupService",
-                        "agentService"
-                    ]
-                }
-            ],
-            "constants": [
-                {
-                    "key": "INFO_HOVER_DELAY",
-                    "value": 2000
-                }
-            ],
-            "representations": [
-                {
-                    "key": "info-button",
-                    "template": infoButtonTemplate,
-                    "gestures": [
-                        "infobutton"
-                    ]
-                }
-            ]
+    return {
+        name:"platform/commonUI/inspect",
+        definition: {
+            "extensions": {
+                "templates": [
+                    {
+                        "key": "info-table",
+                        "template": infoTableTemplate
+                    },
+                    {
+                        "key": "info-bubble",
+                        "template": infoBubbleTemplate
+                    }
+                ],
+                "containers": [
+                    {
+                        "key": "bubble",
+                        "template": bubbleTemplate,
+                        "attributes": [
+                            "bubbleTitle",
+                            "bubbleLayout"
+                        ],
+                        "alias": "bubble"
+                    }
+                ],
+                "gestures": [
+                    {
+                        "key": "info",
+                        "implementation": InfoGesture,
+                        "depends": [
+                            "$timeout",
+                            "agentService",
+                            "infoService",
+                            "INFO_HOVER_DELAY"
+                        ]
+                    },
+                    {
+                        "key": "infobutton",
+                        "implementation": InfoButtonGesture,
+                        "depends": [
+                            "$document",
+                            "agentService",
+                            "infoService"
+                        ]
+                    }
+                ],
+                "services": [
+                    {
+                        "key": "infoService",
+                        "implementation": InfoService,
+                        "depends": [
+                            "$compile",
+                            "$rootScope",
+                            "popupService",
+                            "agentService"
+                        ]
+                    }
+                ],
+                "constants": [
+                    {
+                        "key": "INFO_HOVER_DELAY",
+                        "value": 2000
+                    }
+                ],
+                "representations": [
+                    {
+                        "key": "info-button",
+                        "template": infoButtonTemplate,
+                        "gestures": [
+                            "infobutton"
+                        ]
+                    }
+                ]
+            }
         }
-    });
+    };
 });

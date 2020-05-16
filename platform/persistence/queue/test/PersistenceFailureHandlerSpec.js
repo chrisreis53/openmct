@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -32,14 +32,6 @@ define(
                 mockPromise,
                 handler;
 
-            function asPromise(value) {
-                return (value || {}).then ? value : {
-                    then: function (callback) {
-                        return asPromise(callback(value));
-                    }
-                };
-            }
-
             function makeMockFailure(id, index) {
                 var mockFailure = jasmine.createSpyObj(
                         'failure-' + id,
@@ -53,10 +45,10 @@ define(
                     'domainObject',
                     ['getCapability', 'useCapability', 'getModel']
                 );
-                mockFailure.domainObject.getCapability.andCallFake(function (c) {
+                mockFailure.domainObject.getCapability.and.callFake(function (c) {
                     return (c === 'persistence') && mockPersistence;
                 });
-                mockFailure.domainObject.getModel.andReturn({ id: id, modified: index });
+                mockFailure.domainObject.getModel.and.returnValue({ id: id, modified: index });
                 mockFailure.persistence = mockPersistence;
                 mockFailure.id = id;
                 mockFailure.error = { key: Constants.REVISION_ERROR_KEY };
@@ -68,49 +60,20 @@ define(
                 mockDialogService = jasmine.createSpyObj('dialogService', ['getUserChoice']);
                 mockFailures = ['a', 'b', 'c'].map(makeMockFailure);
                 mockPromise = jasmine.createSpyObj('promise', ['then']);
-                mockDialogService.getUserChoice.andReturn(mockPromise);
-                mockQ.all.andReturn(mockPromise);
-                mockPromise.then.andReturn(mockPromise);
+                mockDialogService.getUserChoice.and.returnValue(mockPromise);
+                mockQ.all.and.returnValue(mockPromise);
+                mockPromise.then.and.returnValue(mockPromise);
                 handler = new PersistenceFailureHandler(mockQ, mockDialogService);
             });
 
-            it("shows a dialog to handle failures", function () {
+            it("discards on handle", function () {
                 handler.handle(mockFailures);
-                expect(mockDialogService.getUserChoice).toHaveBeenCalled();
-            });
-
-            it("overwrites on request", function () {
-                mockQ.all.andReturn(asPromise([]));
-                handler.handle(mockFailures);
-                // User chooses overwrite
-                mockPromise.then.mostRecentCall.args[0](Constants.OVERWRITE_KEY);
-                // Should refresh, remutate, and requeue all objects
-                mockFailures.forEach(function (mockFailure, i) {
-                    expect(mockFailure.persistence.refresh).toHaveBeenCalled();
-                    expect(mockFailure.requeue).toHaveBeenCalled();
-                    expect(mockFailure.domainObject.useCapability).toHaveBeenCalledWith(
-                        'mutation',
-                        jasmine.any(Function),
-                        i // timestamp
-                    );
-                    expect(mockFailure.domainObject.useCapability.mostRecentCall.args[1]())
-                        .toEqual({ id: mockFailure.id, modified: i });
-                });
-            });
-
-            it("discards on request", function () {
-                mockQ.all.andReturn(asPromise([]));
-                handler.handle(mockFailures);
-                // User chooses overwrite
-                mockPromise.then.mostRecentCall.args[0](false);
-                // Should refresh, but not remutate, and requeue all objects
                 mockFailures.forEach(function (mockFailure) {
                     expect(mockFailure.persistence.refresh).toHaveBeenCalled();
                     expect(mockFailure.requeue).not.toHaveBeenCalled();
                     expect(mockFailure.domainObject.useCapability).not.toHaveBeenCalled();
                 });
             });
-
         });
     }
 );

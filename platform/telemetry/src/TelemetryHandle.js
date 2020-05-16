@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -101,7 +101,7 @@ define(
 
                 // If the request is a simple number, treat it as a duration
                 request = (typeof request === 'number') ?
-                        { duration: request } : request;
+                    { duration: request } : request;
 
                 // Look up telemetry-providing objects from the subscription,
                 // then issue new requests.
@@ -131,8 +131,8 @@ define(
                 }
 
                 return typeof index !== 'number' ?
-                        subscription.getDatum(telemetryObject) :
-                        makeNewDatum(this.getSeries(telemetryObject));
+                    subscription.getDatum(telemetryObject) :
+                    makeNewDatum(this.getSeries(telemetryObject));
             };
 
             return self;

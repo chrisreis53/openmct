@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -52,7 +52,7 @@ define(
 
                 // Convert to an array if necessary
                 categories = Array.isArray(categories) ?
-                        categories : [categories];
+                    categories : [categories];
 
                 // Store action under all relevant categories
                 categories.forEach(function (category) {

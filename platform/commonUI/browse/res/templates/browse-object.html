@@ -1,5 +1,5 @@
 <!--
- Open MCT, Copyright (c) 2014-2017, United States Government
+ Open MCT, Copyright (c) 2014-2018, United States Government
  as represented by the Administrator of the National Aeronautics and Space
  Administration. All rights reserved.
 
@@ -57,9 +57,13 @@
             </div>
             <mct-representation key="representation.selected.key"
                                 mct-object="representation.selected.key && domainObject"
-                                class="abs flex-elem grows object-holder-main scroll">
+                                class="abs flex-elem grows object-holder-main scroll"
+                                mct-selectable="{
+                                    item: domainObject.useCapability('adapter'),
+                                    oldItem: domainObject
+                                }"
+                                mct-init-select>
             </mct-representation>
         </div>
     </div>
-    <mct-include key="'conductor'" class="abs holder flex-elem flex-fixed l-flex-row l-time-conductor-holder"></mct-include>
 </div>

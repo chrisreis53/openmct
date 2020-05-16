@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -39,10 +39,8 @@ define(
             beforeEach(function () {
                 mockScope = jasmine.createSpyObj(
                     "$scope",
-                    ["$watch"]
+                    ["$watch", "$on"]
                 );
-                mockScope.ngModel = {};
-                mockScope.ngModel.selectedObject = 'mock selected object';
 
                 mockObjectService = jasmine.createSpyObj(
                     "objectService",
@@ -52,14 +50,14 @@ define(
                     "promise",
                     ["then"]
                 );
-                mockObjectService.getObjects.andReturn(mockPromise);
+                mockObjectService.getObjects.and.returnValue(mockPromise);
 
                 mockDomainObject = jasmine.createSpyObj(
                     "selectedObject",
                     ["hasCapability", "getCapability", "useCapability", "getModel"]
                 );
-                mockDomainObject.getModel.andReturn({location: 'somewhere'});
-                mockDomainObject.hasCapability.andReturn(true);
+                mockDomainObject.getModel.and.returnValue({location: 'somewhere'});
+                mockDomainObject.hasCapability.and.returnValue(true);
 
                 mockContextCapability = jasmine.createSpyObj(
                     "context capability",
@@ -69,40 +67,45 @@ define(
                     "location capability",
                     ["isLink"]
                 );
-                mockDomainObject.getCapability.andCallFake(function (param) {
+
+                mockDomainObject.getCapability.and.callFake(function (param) {
                     if (param === 'location') {
                         return mockLocationCapability;
                     } else if (param === 'context') {
                         return mockContextCapability;
+                    } else if (param === 'mutation') {
+                        return {
+                            listen: function () {
+                                return true;
+                            }
+                        };
                     }
                 });
 
+                mockScope.domainObject = mockDomainObject;
                 controller = new ObjectInspectorController(mockScope, mockObjectService);
-
-                // Change the selected object to trigger the watch call
-                mockScope.ngModel.selectedObject = mockDomainObject;
             });
 
             it("watches for changes to the selected object", function () {
-                expect(mockScope.$watch).toHaveBeenCalledWith('ngModel.selectedObject', jasmine.any(Function));
+                expect(mockScope.$watch).toHaveBeenCalledWith('domainObject', jasmine.any(Function));
             });
 
             it("looks for contextual parent objects", function () {
-                mockScope.$watch.mostRecentCall.args[1]();
+                mockScope.$watch.calls.mostRecent().args[1]();
                 expect(mockContextCapability.getParent).toHaveBeenCalled();
             });
 
             it("if link, looks for primary parent objects", function () {
-                mockLocationCapability.isLink.andReturn(true);
+                mockLocationCapability.isLink.and.returnValue(true);
 
-                mockScope.$watch.mostRecentCall.args[1]();
+                mockScope.$watch.calls.mostRecent().args[1]();
                 expect(mockDomainObject.getModel).toHaveBeenCalled();
                 expect(mockObjectService.getObjects).toHaveBeenCalled();
-                mockPromise.then.mostRecentCall.args[0]({'somewhere': mockDomainObject});
+                mockPromise.then.calls.mostRecent().args[0]({'somewhere': mockDomainObject});
             });
 
             it("gets metadata", function () {
-                mockScope.$watch.mostRecentCall.args[1]();
+                mockScope.$watch.calls.mostRecent().args[1]();
                 expect(mockDomainObject.useCapability).toHaveBeenCalledWith('metadata');
             });
         });

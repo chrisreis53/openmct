@@ -20,11 +20,16 @@
  * at runtime from the About dialog for additional information.
  *****************************************************************************/
 
-define(
-    ['moment'],
-    function (moment) {
+define([
+    'moment',
+    'moment-timezone'
+],
+function (
+    moment,
+    momentTimezone
+) {
 
-        /**
+    /**
          * Controller for views of a Clock domain object.
          *
          * @constructor
@@ -33,68 +38,73 @@ define(
          * @param {platform/features/clock.TickerService} tickerService
          *        a service used to align behavior with clock ticks
          */
-        function ClockController($scope, tickerService) {
-            var lastTimestamp,
-                unlisten,
-                timeFormat,
-                self = this;
+    function ClockController($scope, tickerService) {
+        var lastTimestamp,
+            unlisten,
+            timeFormat,
+            zoneName,
+            self = this;
 
-            function update() {
-                var m = moment.utc(lastTimestamp);
-                self.textValue = timeFormat && m.format(timeFormat);
-                self.ampmValue = m.format("A"); // Just the AM or PM part
-            }
-
-            function tick(timestamp) {
-                lastTimestamp = timestamp;
-                update();
-            }
-
-            function updateFormat(clockFormat) {
-                var baseFormat;
-
-                if (clockFormat !== undefined) {
-                    baseFormat = clockFormat[0];
-
-                    self.use24 = clockFormat[1] === 'clock24';
-                    timeFormat = self.use24 ?
-                            baseFormat.replace('hh', "HH") : baseFormat;
-
-                    update();
-                }
-            }
-            // Pull in the clock format from the domain object model
-            $scope.$watch('model.clockFormat', updateFormat);
-
-            // Listen for clock ticks ... and stop listening on destroy
-            unlisten = tickerService.listen(tick);
-            $scope.$on('$destroy', unlisten);
+        function update() {
+            var m = zoneName ?
+                moment.utc(lastTimestamp).tz(zoneName) : moment.utc(lastTimestamp);
+            self.zoneAbbr = m.zoneAbbr();
+            self.textValue = timeFormat && m.format(timeFormat);
+            self.ampmValue = m.format("A"); // Just the AM or PM part
         }
 
-        /**
+        function tick(timestamp) {
+            lastTimestamp = timestamp;
+            update();
+        }
+
+        function updateModel(model) {
+            var baseFormat;
+            if (model !== undefined) {
+                baseFormat = model.clockFormat[0];
+
+                self.use24 = model.clockFormat[1] === 'clock24';
+                timeFormat = self.use24 ?
+                    baseFormat.replace('hh', "HH") : baseFormat;
+                // If wrong timezone is provided, the UTC will be used
+                zoneName = momentTimezone.tz.names().includes(model.timezone) ?
+                    model.timezone : "UTC";
+                update();
+            }
+        }
+
+        // Pull in the model (clockFormat and timezone) from the domain object model
+        $scope.$watch('model', updateModel);
+
+        // Listen for clock ticks ... and stop listening on destroy
+        unlisten = tickerService.listen(tick);
+        $scope.$on('$destroy', unlisten);
+    }
+
+    /**
          * Get the clock's time zone, as displayable text.
          * @returns {string}
          */
-        ClockController.prototype.zone = function () {
-            return "UTC";
-        };
+    ClockController.prototype.zone = function () {
+        return this.zoneAbbr;
+    };
 
-        /**
+    /**
          * Get the current time, as displayable text.
          * @returns {string}
          */
-        ClockController.prototype.text = function () {
-            return this.textValue;
-        };
+    ClockController.prototype.text = function () {
+        return this.textValue;
+    };
 
-        /**
+    /**
          * Get the text to display to qualify a time as AM or PM.
          * @returns {string}
          */
-        ClockController.prototype.ampm = function () {
-            return this.use24 ? '' : this.ampmValue;
-        };
+    ClockController.prototype.ampm = function () {
+        return this.use24 ? '' : this.ampmValue;
+    };
 
-        return ClockController;
-    }
+    return ClockController;
+}
 );

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -49,16 +49,16 @@ define(
                     ['getId', 'getCapability', 'getModel']
                 );
 
-                mockInjector.get.andCallFake(function (key) {
+                mockInjector.get.and.callFake(function (key) {
                     return {
                         'instantiate': mockInstantiate
                     }[key];
                 });
-                mockIdentifierService.parse.andReturn(mockIdentifier);
-                mockIdentifierService.generate.andReturn("some-id");
+                mockIdentifierService.parse.and.returnValue(mockIdentifier);
+                mockIdentifierService.generate.and.returnValue("some-id");
 
                 mockNow = jasmine.createSpy();
-                mockNow.andReturn(1234321);
+                mockNow.and.returnValue(1234321);
 
                 instantiation = new InstantiationCapability(
                     mockInjector,
@@ -75,13 +75,13 @@ define(
 
             it("uses instantiate and contextualize to create domain objects", function () {
                 var mockDomainObj = jasmine.createSpyObj('domainObject', [
-                    'getId',
-                    'getModel',
-                    'getCapability',
-                    'useCapability',
-                    'hasCapability'
-                ]), testModel = { someKey: "some value" };
-                mockInstantiate.andReturn(mockDomainObj);
+                        'getId',
+                        'getModel',
+                        'getCapability',
+                        'useCapability',
+                        'hasCapability'
+                    ]), testModel = { someKey: "some value" };
+                mockInstantiate.and.returnValue(mockDomainObj);
                 instantiation.instantiate(testModel);
                 expect(mockInstantiate)
                     .toHaveBeenCalledWith({

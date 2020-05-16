@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -65,6 +65,20 @@ define(['csv'], function (CSV) {
         this.saveAs(blob, filename);
     };
 
+    /**
+     * Export an object as a JSON file. Triggers a download using the function
+     * provided when the ExportService was instantiated.
+     *
+     * @param {Object} obj an object to be exported as JSON
+     * @param {ExportOptions} [options] additional parameters for the file
+     *        export
+     */
+    ExportService.prototype.exportJSON = function (obj, options) {
+        var filename = (options && options.filename) || "test-export.json";
+        var jsonText = JSON.stringify(obj);
+        var blob = new Blob([jsonText], {type: "application/json"});
+        this.saveAs(blob, filename);
+    };
     /**
      * Additional parameters for file export.
      * @typedef ExportOptions

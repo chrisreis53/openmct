@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -46,8 +46,8 @@ define(
                 mockHttp = jasmine.createSpy("$http");
                 mockQ = jasmine.createSpyObj("$q", ["when", "reject"]);
 
-                mockQ.when.andCallFake(mockPromise);
-                mockQ.reject.andCallFake(function (value) {
+                mockQ.when.and.callFake(mockPromise);
+                mockQ.reject.and.callFake(function (value) {
                     return {
                         then: function (ignored, callback) {
                             return mockPromise(callback(value));
@@ -84,27 +84,30 @@ define(
 
             it("allows object creation", function () {
                 var model = { someKey: "some value" };
-                mockHttp.andReturn(mockPromise({
-                    data: { "_id": "abc", "_version": 1 }
+                mockHttp.and.returnValue(mockPromise({
+                    data: { "_id": "abc", "_seq_no": 1, "_primary_term": 1 }
                 }));
                 provider.createObject("testSpace", "abc", model).then(capture);
                 expect(mockHttp).toHaveBeenCalledWith({
                     url: "/test/db/abc",
                     method: "PUT",
-                    data: model
+                    data: model,
+                    params: undefined
                 });
-                expect(capture.mostRecentCall.args[0]).toBeTruthy();
+                expect(capture.calls.mostRecent().args[0]).toBeTruthy();
             });
 
             it("allows object models to be read back", function () {
                 var model = { someKey: "some value" };
-                mockHttp.andReturn(mockPromise({
-                    data: { "_id": "abc", "_version": 1, "_source": model }
+                mockHttp.and.returnValue(mockPromise({
+                    data: { "_id": "abc", "_seq_no": 1, "_primary_term": 1, "_source": model }
                 }));
                 provider.readObject("testSpace", "abc").then(capture);
                 expect(mockHttp).toHaveBeenCalledWith({
                     url: "/test/db/abc",
-                    method: "GET"
+                    method: "GET",
+                    params: undefined,
+                    data: undefined
                 });
                 expect(capture).toHaveBeenCalledWith(model);
             });
@@ -113,47 +116,49 @@ define(
                 var model = { someKey: "some value" };
 
                 // First do a read to populate rev tags...
-                mockHttp.andReturn(mockPromise({
-                    data: { "_id": "abc", "_version": 42, "_source": {} }
+                mockHttp.and.returnValue(mockPromise({
+                    data: { "_id": "abc", "_source": {} }
                 }));
                 provider.readObject("testSpace", "abc");
 
                 // Now perform an update
-                mockHttp.andReturn(mockPromise({
-                    data: { "_id": "abc", "_version": 43, "_source": {} }
+                mockHttp.and.returnValue(mockPromise({
+                    data: { "_id": "abc", "_seq_no": 1, "_source": {} }
                 }));
                 provider.updateObject("testSpace", "abc", model).then(capture);
                 expect(mockHttp).toHaveBeenCalledWith({
                     url: "/test/db/abc",
                     method: "PUT",
-                    params: { version: 42 },
+                    params: undefined,
                     data: model
                 });
-                expect(capture.mostRecentCall.args[0]).toBeTruthy();
+                expect(capture.calls.mostRecent().args[0]).toBeTruthy();
             });
 
             it("allows object deletion", function () {
                 // First do a read to populate rev tags...
-                mockHttp.andReturn(mockPromise({
-                    data: { "_id": "abc", "_version": 42, "_source": {} }
+                mockHttp.and.returnValue(mockPromise({
+                    data: { "_id": "abc", "_source": {} }
                 }));
                 provider.readObject("testSpace", "abc");
 
                 // Now perform an update
-                mockHttp.andReturn(mockPromise({
-                    data: { "_id": "abc", "_version": 42, "_source": {} }
+                mockHttp.and.returnValue(mockPromise({
+                    data: { "_id": "abc", "_source": {} }
                 }));
                 provider.deleteObject("testSpace", "abc", {}).then(capture);
                 expect(mockHttp).toHaveBeenCalledWith({
                     url: "/test/db/abc",
-                    method: "DELETE"
+                    method: "DELETE",
+                    params: undefined,
+                    data: undefined
                 });
-                expect(capture.mostRecentCall.args[0]).toBeTruthy();
+                expect(capture.calls.mostRecent().args[0]).toBeTruthy();
             });
 
             it("returns undefined when objects are not found", function () {
                 // Act like a 404
-                mockHttp.andReturn({
+                mockHttp.and.returnValue({
                     then: function (success, fail) {
                         return mockPromise(fail());
                     }
@@ -162,18 +167,18 @@ define(
                 expect(capture).toHaveBeenCalledWith(undefined);
             });
 
-            it("handles rejection due to version", function () {
+            it("handles rejection due to _seq_no", function () {
                 var model = { someKey: "some value" },
                     mockErrorCallback = jasmine.createSpy('error');
 
                 // First do a read to populate rev tags...
-                mockHttp.andReturn(mockPromise({
-                    data: { "_id": "abc", "_version": 42, "_source": {} }
+                mockHttp.and.returnValue(mockPromise({
+                    data: { "_id": "abc", "_seq_no": 1, "_source": {} }
                 }));
                 provider.readObject("testSpace", "abc");
 
                 // Now perform an update
-                mockHttp.andReturn(mockPromise({
+                mockHttp.and.returnValue(mockPromise({
                     data: { "status": 409, "error": "Revision error..." }
                 }));
                 provider.updateObject("testSpace", "abc", model).then(
@@ -190,13 +195,13 @@ define(
                     mockErrorCallback = jasmine.createSpy('error');
 
                 // First do a read to populate rev tags...
-                mockHttp.andReturn(mockPromise({
-                    data: { "_id": "abc", "_version": 42, "_source": {} }
+                mockHttp.and.returnValue(mockPromise({
+                    data: { "_id": "abc", "_seq_no": 1, "_source": {} }
                 }));
                 provider.readObject("testSpace", "abc");
 
                 // Now perform an update
-                mockHttp.andReturn(mockPromise({
+                mockHttp.and.returnValue(mockPromise({
                     data: { "status": 410, "error": "Revision error..." }
                 }));
                 provider.updateObject("testSpace", "abc", model).then(

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -38,11 +38,11 @@ define(
                     return synchronousPromise(callback(value));
                 }
             };
-            spyOn(promise, 'then').andCallThrough();
+            spyOn(promise, 'then').and.callThrough();
             return promise;
         }
 
-        describe("CopyService", function () {
+        xdescribe("CopyService", function () {
             var policyService;
 
             beforeEach(function () {
@@ -109,12 +109,12 @@ define(
                     });
 
                     it("and returns false", function () {
-                        policyService.allow.andReturn(false);
+                        policyService.allow.and.returnValue(false);
                         expect(validate()).toBe(false);
                     });
 
                     it("and returns true", function () {
-                        policyService.allow.andReturn(true);
+                        policyService.allow.and.returnValue(true);
                         expect(validate()).toBe(true);
                     });
                 });
@@ -124,7 +124,6 @@ define(
 
                 var mockQ,
                     mockDeferred,
-                    createObjectPromise,
                     copyService,
                     object,
                     newParent,
@@ -138,8 +137,7 @@ define(
                     resolvedValue;
 
                 beforeEach(function () {
-                    createObjectPromise = synchronousPromise(undefined);
-                    policyService.allow.andReturn(true);
+                    policyService.allow.and.returnValue(true);
 
                     persistObjectPromise = synchronousPromise(undefined);
 
@@ -152,26 +150,26 @@ define(
                         "persistenceCapability",
                         ["persist", "getSpace"]
                     );
-                    persistenceCapability.persist.andReturn(persistObjectPromise);
+                    persistenceCapability.persist.and.returnValue(persistObjectPromise);
 
                     compositionCapability = jasmine.createSpyObj(
                         'compositionCapability',
                         ['invoke', 'add']
                     );
-                    compositionCapability.add.andCallFake(synchronousPromise);
+                    compositionCapability.add.and.callFake(synchronousPromise);
 
                     locationCapability = jasmine.createSpyObj(
                         'locationCapability',
                         ['isLink']
                     );
-                    locationCapability.isLink.andReturn(false);
+                    locationCapability.isLink.and.returnValue(false);
 
                     mockDeferred = jasmine.createSpyObj(
                         'mockDeferred',
                         ['notify', 'resolve', 'reject']
                     );
-                    mockDeferred.notify.andCallFake(function () {});
-                    mockDeferred.resolve.andCallFake(function (value) {
+                    mockDeferred.notify.and.callFake(function () {});
+                    mockDeferred.resolve.and.callFake(function (value) {
                         resolvedValue = value;
                     });
                     mockDeferred.promise = {
@@ -184,9 +182,9 @@ define(
                         'mockQ',
                         ['when', 'all', 'reject', 'defer']
                     );
-                    mockQ.reject.andReturn(synchronousPromise(undefined));
-                    mockQ.when.andCallFake(synchronousPromise);
-                    mockQ.all.andCallFake(function (promises) {
+                    mockQ.reject.and.returnValue(synchronousPromise(undefined));
+                    mockQ.when.and.callFake(synchronousPromise);
+                    mockQ.all.and.callFake(function (promises) {
                         var result = {};
                         Object.keys(promises).forEach(function (k) {
                             promises[k].then(function (v) {
@@ -195,7 +193,7 @@ define(
                         });
                         return synchronousPromise(result);
                     });
-                    mockQ.defer.andReturn(mockDeferred);
+                    mockQ.defer.and.returnValue(mockDeferred);
 
                 });
 
@@ -241,7 +239,7 @@ define(
                             }
                         });
 
-                        instantiationCapability.invoke.andCallFake(
+                        instantiationCapability.invoke.and.callFake(
                             function (model) {
                                 objectCopy.model = model;
                                 return objectCopy;
@@ -260,7 +258,7 @@ define(
                     });
 
                     it("deep clones object model", function () {
-                        var newModel = copyFinished.calls[0].args[0].getModel();
+                        var newModel = copyFinished.calls.all()[0].args[0].getModel();
                         expect(newModel).toEqual(object.model);
                         expect(newModel).not.toBe(object.model);
                     });
@@ -275,14 +273,13 @@ define(
                 describe("on domainObject with composition", function () {
                     var childObject,
                         objectClone,
-                        childObjectClone,
-                        compositionPromise;
+                        childObjectClone;
 
                     beforeEach(function () {
                         var invocationCount = 0,
                             objectClones;
 
-                        instantiationCapability.invoke.andCallFake(
+                        instantiationCapability.invoke.and.callFake(
                             function (model) {
                                 var cloneToReturn = objectClones[invocationCount++];
                                 cloneToReturn.model = model;
@@ -325,14 +322,9 @@ define(
                             }
                         });
 
-                        compositionPromise = jasmine.createSpyObj(
-                            'compositionPromise',
-                            ['then']
-                        );
-
                         compositionCapability
                             .invoke
-                            .andReturn(synchronousPromise([childObject]));
+                            .and.returnValue(synchronousPromise([childObject]));
 
                         object = domainObjectFactory({
                             name: 'some object',
@@ -390,7 +382,7 @@ define(
 
                     describe("when cloning non-creatable objects", function () {
                         beforeEach(function () {
-                            policyService.allow.andCallFake(function (category) {
+                            policyService.allow.and.callFake(function (category) {
                                 //Return false for 'creation' policy
                                 return category !== 'creation';
                             });
@@ -400,7 +392,7 @@ define(
                             copyResult.then(copyFinished);
                         });
                         it ("creates link instead of clone", function () {
-                            var copiedObject = copyFinished.calls[0].args[0];
+                            var copiedObject = copyFinished.calls.all()[0].args[0];
                             expect(copiedObject).toBe(object);
                             expect(compositionCapability.add)
                                 .toHaveBeenCalledWith(copiedObject);
@@ -408,6 +400,10 @@ define(
                     });
 
                     describe("when provided a filtering function", function () {
+                        beforeEach(function () {
+                            copyFinished = jasmine.createSpy('copyFinished');
+                        });
+
                         function accept() {
                             return true;
                         }
@@ -419,7 +415,7 @@ define(
                             "rejected by the filter", function () {
                             copyService.perform(object, newParent, reject)
                                 .then(copyFinished);
-                            expect(copyFinished.mostRecentCall.args[0])
+                            expect(copyFinished.calls.mostRecent().args[0])
                                 .toBe(object);
                         });
 
@@ -427,7 +423,7 @@ define(
                             "accepted by the filter", function () {
                             copyService.perform(object, newParent, accept)
                                 .then(copyFinished);
-                            expect(copyFinished.mostRecentCall.args[0])
+                            expect(copyFinished.calls.mostRecent().args[0])
                                 .not.toBe(object);
                         });
                     });
@@ -454,7 +450,7 @@ define(
                             }
                         });
 
-                        instantiationCapability.invoke.andReturn(object);
+                        instantiationCapability.invoke.and.returnValue(object);
                     });
 
                     it("throws an error", function () {
@@ -466,9 +462,9 @@ define(
                         }
 
                         spyOn(service, "validate");
-                        service.validate.andReturn(true);
+                        service.validate.and.returnValue(true);
                         expect(perform).not.toThrow();
-                        service.validate.andReturn(false);
+                        service.validate.and.returnValue(false);
                         expect(perform).toThrow();
                     });
                 });

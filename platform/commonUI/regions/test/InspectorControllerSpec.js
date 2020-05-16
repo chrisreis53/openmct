@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -27,82 +27,93 @@ define(
         describe("The inspector controller ", function () {
             var mockScope,
                 mockDomainObject,
-                mockTypeCapability,
-                mockTypeDefinition,
-                mockPolicyService,
-                mockStatusCapability,
-                capabilities = {},
-                controller;
+                mockOpenMCT,
+                mockSelection,
+                mockInspectorViews,
+                mockTypeDef,
+                controller,
+                container,
+                $document = [],
+                selectable = [];
 
             beforeEach(function () {
-                mockTypeDefinition = {
-                    inspector:
-                        {
-                            'regions': [
-                                {'name': 'Part One'},
-                                {'name': 'Part Two'}
-                            ]
-                        }
+                mockTypeDef = {
+                    typeDef: {
+                        inspector: "some-key"
+                    }
                 };
-
-                mockTypeCapability = jasmine.createSpyObj('typeCapability', [
-                    'getDefinition'
-                ]);
-                mockTypeCapability.getDefinition.andReturn(mockTypeDefinition);
-                capabilities.type = mockTypeCapability;
-
-                mockStatusCapability = jasmine.createSpyObj('statusCapability', [
-                    'listen'
-                ]);
-                capabilities.status = mockStatusCapability;
 
                 mockDomainObject = jasmine.createSpyObj('domainObject', [
                     'getCapability'
                 ]);
-                mockDomainObject.getCapability.andCallFake(function (name) {
-                    return capabilities[name];
-                });
-
-                mockPolicyService = jasmine.createSpyObj('policyService', [
-                   'allow'
-                ]);
+                mockDomainObject.getCapability.and.returnValue(mockTypeDef);
 
                 mockScope = jasmine.createSpyObj('$scope',
-                    ['$on']
+                    ['$on', 'selection']
                 );
 
-                mockScope.domainObject = mockDomainObject;
+                selectable[0] = {
+                    context: {
+                        oldItem: mockDomainObject
+                    }
+                };
+
+                mockSelection = jasmine.createSpyObj("selection", [
+                    'on',
+                    'off',
+                    'get'
+                ]);
+                mockSelection.get.and.returnValue(selectable);
+
+                mockInspectorViews = jasmine.createSpyObj('inspectorViews', ['get']);
+                mockOpenMCT = {
+                    selection: mockSelection,
+                    inspectorViews: mockInspectorViews
+                };
+
+                container = jasmine.createSpy('container', ['innerHTML']);
+                $document[0] = jasmine.createSpyObj("$document", ['querySelectorAll']);
+                $document[0].querySelectorAll.and.returnValue([container]);
+
+                controller = new InspectorController(mockScope, mockOpenMCT, $document);
             });
 
-            it("filters out regions disallowed by region policy", function () {
-                mockPolicyService.allow.andReturn(false);
-                controller = new InspectorController(mockScope, mockPolicyService);
-                expect(mockScope.regions.length).toBe(0);
+            it("listens for selection change event", function () {
+                expect(mockOpenMCT.selection.on).toHaveBeenCalledWith(
+                    'change',
+                    jasmine.any(Function)
+                );
+
+                expect(controller.selectedItem()).toEqual(mockDomainObject);
+
+                var mockItem = jasmine.createSpyObj('domainObject', [
+                    'getCapability'
+                ]);
+                mockItem.getCapability.and.returnValue(mockTypeDef);
+                selectable[0].context.oldItem = mockItem;
+
+                mockOpenMCT.selection.on.calls.mostRecent().args[1](selectable);
+
+                expect(controller.selectedItem()).toEqual(mockItem);
             });
 
-            it("does not filter out regions allowed by region policy", function () {
-                mockPolicyService.allow.andReturn(true);
-                controller = new InspectorController(mockScope, mockPolicyService);
-                expect(mockScope.regions.length).toBe(2);
+            it("cleans up on scope destroy", function () {
+                expect(mockScope.$on).toHaveBeenCalledWith(
+                    '$destroy',
+                    jasmine.any(Function)
+                );
+
+                mockScope.$on.calls.all()[0].args[1]();
+
+                expect(mockOpenMCT.selection.off).toHaveBeenCalledWith(
+                    'change',
+                    jasmine.any(Function)
+                );
             });
 
-            it("Responds to status changes", function () {
-                mockPolicyService.allow.andReturn(true);
-                controller = new InspectorController(mockScope, mockPolicyService);
-                expect(mockScope.regions.length).toBe(2);
-                expect(mockStatusCapability.listen).toHaveBeenCalled();
-                mockPolicyService.allow.andReturn(false);
-                mockStatusCapability.listen.mostRecentCall.args[0]();
-                expect(mockScope.regions.length).toBe(0);
-            });
-
-            it("Unregisters status listener", function () {
-                var mockListener = jasmine.createSpy('listener');
-                mockStatusCapability.listen.andReturn(mockListener);
-                controller = new InspectorController(mockScope, mockPolicyService);
-                expect(mockScope.$on).toHaveBeenCalledWith("$destroy", jasmine.any(Function));
-                mockScope.$on.mostRecentCall.args[1]();
-                expect(mockListener).toHaveBeenCalled();
+            it("adds selection object to scope", function () {
+                expect(mockScope.selection).toEqual(selectable);
+                expect(controller.selectedItem()).toEqual(mockDomainObject);
             });
         });
     }

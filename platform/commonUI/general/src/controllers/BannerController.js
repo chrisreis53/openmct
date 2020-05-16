@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -50,7 +50,7 @@ define(
             };
             $scope.dismiss = function (notification, $event) {
                 $event.stopPropagation();
-                notification.dismissOrMinimize();
+                notification.dismiss();
             };
             $scope.maximize = function (notification) {
                 if (notification.model.severity !== "info") {
@@ -60,7 +60,7 @@ define(
                     };
                     //If the notification is dismissed by the user, close
                     // the dialog.
-                    notification.onDismiss(function () {
+                    notification.on('dismiss', function () {
                         dialog.dismiss();
                     });
 

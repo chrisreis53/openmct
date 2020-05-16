@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -28,16 +28,6 @@ define(
     [],
     function () {
 
-        function isDirty(domainObject) {
-            var navigatedObject = domainObject,
-                editorCapability = navigatedObject &&
-                    navigatedObject.getCapability("editor");
-
-            return editorCapability &&
-                editorCapability.isEditContextRoot() &&
-                editorCapability.dirty();
-        }
-
         function cancelEditing(domainObject) {
             var navigatedObject = domainObject,
                 editorCapability = navigatedObject &&
@@ -59,10 +49,7 @@ define(
 
             var removeCheck = navigationService
                 .checkBeforeNavigation(function () {
-                    if (isDirty(domainObject)) {
-                        return "Continuing will cause the loss of any unsaved changes.";
-                    }
-                    return false;
+                    return "Continuing will cause the loss of any unsaved changes.";
                 });
 
             $scope.$on('$destroy', function () {

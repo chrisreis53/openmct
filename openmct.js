@@ -19,86 +19,19 @@
  * this source code distribution or the Licensing information page available
  * at runtime from the About dialog for additional information.
  *****************************************************************************/
-/*global requirejs*/
+/*global module*/
 
-requirejs.config({
-    "paths": {
-        "legacyRegistry": "src/legacyRegistry",
-        "angular": "bower_components/angular/angular.min",
-        "angular-route": "bower_components/angular-route/angular-route.min",
-        "csv": "bower_components/comma-separated-values/csv.min",
-        "EventEmitter": "bower_components/eventemitter3/index",
-        "es6-promise": "bower_components/es6-promise/es6-promise.min",
-        "html2canvas": "bower_components/html2canvas/build/html2canvas.min",
-        "moment": "bower_components/moment/moment",
-        "moment-duration-format": "bower_components/moment-duration-format/lib/moment-duration-format",
-        "saveAs": "bower_components/FileSaver.js/FileSaver.min",
-        "screenfull": "bower_components/screenfull/dist/screenfull.min",
-        "text": "bower_components/text/text",
-        "uuid": "bower_components/node-uuid/uuid",
-        "zepto": "bower_components/zepto/zepto.min",
-        "lodash": "bower_components/lodash/lodash",
-        "d3-selection": "node_modules/d3-selection/build/d3-selection.min",
-        "d3-scale": "node_modules/d3-scale/build/d3-scale.min",
-        "d3-axis": "node_modules/d3-axis/build/d3-axis.min",
-        "d3-array": "node_modules/d3-array/build/d3-array.min",
-        "d3-collection": "node_modules/d3-collection/build/d3-collection.min",
-        "d3-color": "node_modules/d3-color/build/d3-color.min",
-        "d3-format": "node_modules/d3-format/build/d3-format.min",
-        "d3-interpolate": "node_modules/d3-interpolate/build/d3-interpolate.min",
-        "d3-time": "node_modules/d3-time/build/d3-time.min",
-        "d3-time-format": "node_modules/d3-time-format/build/d3-time-format.min"
-    },
-    "shim": {
-        "angular": {
-            "exports": "angular"
-        },
-        "angular-route": {
-            "deps": ["angular"]
-        },
-        "EventEmitter": {
-            "exports": "EventEmitter"
-        },
-        "html2canvas": {
-            "exports": "html2canvas"
-        },
-        "moment-duration-format": {
-            "deps": ["moment"]
-        },
-        "screenfull": {
-            "exports": "screenfull"
-        },
-        "zepto": {
-            "exports": "Zepto"
-        },
-        "lodash": {
-            "exports": "lodash"
-        },
-        "d3-selection": {
-            "exports": "d3-selection"
-        },
-        "d3-scale": {
-            "deps": ["d3-array", "d3-collection", "d3-color", "d3-format", "d3-interpolate", "d3-time", "d3-time-format"],
-            "exports": "d3-scale"
-        },
-        "d3-axis": {
-            "exports": "d3-axis"
-        }
+const matcher = /\/openmct.js$/;
+if (document.currentScript) {
+    let src = document.currentScript.src;
+    if (src && matcher.test(src)) {
+        // eslint-disable-next-line no-undef
+        __webpack_public_path__ = src.replace(matcher, '') + '/';
     }
-});
+}
 
-define([
-    './platform/framework/src/Main',
-    './src/defaultRegistry',
-    './src/MCT'
-], function (Main, defaultRegistry, MCT) {
-    var openmct = new MCT();
+const MCT = require('./src/MCT');
 
-    openmct.legacyRegistry = defaultRegistry;
+var openmct = new MCT();
 
-    openmct.on('start', function () {
-        return new Main().run(defaultRegistry);
-    });
-
-    return openmct;
-});
+module.exports = openmct;

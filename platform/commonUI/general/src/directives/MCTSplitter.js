@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -37,15 +37,16 @@ define(
          */
         function MCTSplitter() {
             function link(scope, element, attrs, mctSplitPane) {
-                var initialPosition;
+                var initialPosition,
+                    newPosition;
 
                 element.addClass("splitter");
 
                 scope.splitter = {
                     // Begin moving this splitter
                     startMove: function () {
+                        mctSplitPane.startResizing();
                         initialPosition = mctSplitPane.position();
-                        mctSplitPane.toggleClass('resizing');
                     },
                     // Handle user changes to splitter position
                     move: function (delta) {
@@ -55,12 +56,16 @@ define(
                                 (anchor.reversed ? -1 : 1);
 
                         // Update the position of this splitter
-                        mctSplitPane.position(initialPosition + pixelDelta);
+                        newPosition =  initialPosition + pixelDelta;
+
+                        if (initialPosition !== newPosition) {
+                            mctSplitPane.position(newPosition);
+                        }
                     },
                     // Grab the event when the user is done moving
                     // the splitter and pass it on
                     endMove: function () {
-                        mctSplitPane.toggleClass('resizing');
+                        mctSplitPane.endResizing(newPosition);
                     }
                 };
             }
@@ -83,4 +88,3 @@ define(
 
     }
 );
-

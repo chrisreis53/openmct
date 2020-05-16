@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -48,9 +48,9 @@ define(
         function toGradient(triplet, value) {
             return triplet.map(function (v) {
                 return Math.round(value > 0 ?
-                        (v + (255 - v) * value) :
-                        (v * (1 + value))
-                    );
+                    (v + (255 - v) * value) :
+                    (v * (1 + value))
+                );
             });
         }
 

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -62,8 +62,8 @@ define(
                 // Determine how long to wait before the next update
                 function currentInterval() {
                     return attrs.mctResizeInterval ?
-                            scope.$eval(attrs.mctResizeInterval) :
-                            DEFAULT_INTERVAL;
+                        scope.$eval(attrs.mctResizeInterval) :
+                        DEFAULT_INTERVAL;
                 }
 
                 // Evaluate mct-resize with the current bounds
@@ -83,13 +83,14 @@ define(
                 // Callback to fire after each timeout;
                 // update bounds and schedule another timeout
                 function onInterval() {
+                    if (!active) {
+                        return;
+                    }
                     fireEval({
                         width: element[0].offsetWidth,
                         height: element[0].offsetHeight
                     });
-                    if (active) {
-                        $timeout(onInterval, currentInterval(), false);
-                    }
+                    $timeout(onInterval, currentInterval(), false);
                 }
 
                 // Stop running in the background

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -57,7 +57,7 @@ define(
                     testAttrs = {};
                     mockSplitPane = jasmine.createSpyObj(
                         'mctSplitPane',
-                        ['position', 'toggleClass', 'anchor']
+                        ['position', 'startResizing', 'endResizing', 'anchor']
                     );
 
                     mctSplitter.link(
@@ -78,17 +78,17 @@ define(
 
                     beforeEach(function () {
                         testPosition = 12321;
-                        mockSplitPane.position.andReturn(testPosition);
-                        mockSplitPane.anchor.andReturn({
+                        mockSplitPane.position.and.returnValue(testPosition);
+                        mockSplitPane.anchor.and.returnValue({
                             orientation: 'vertical',
                             reversed: false
                         });
                         mockScope.splitter.startMove();
                     });
 
-                    it("adds a 'resizing' class", function () {
-                        expect(mockSplitPane.toggleClass)
-                            .toHaveBeenCalledWith('resizing');
+                    it("tell's the splitter when it is resizing", function () {
+                        expect(mockSplitPane.startResizing)
+                            .toHaveBeenCalled();
                     });
 
                     it("repositions during drag", function () {
@@ -97,11 +97,10 @@ define(
                             .toHaveBeenCalledWith(testPosition + 10);
                     });
 
-                    it("removes the 'resizing' class when finished", function () {
-                        mockSplitPane.toggleClass.reset();
+                    it("tell's the splitter when it is done resizing", function () {
+                        mockScope.splitter.move([10,0]);
                         mockScope.splitter.endMove();
-                        expect(mockSplitPane.toggleClass)
-                            .toHaveBeenCalledWith('resizing');
+                        expect(mockSplitPane.endResizing).toHaveBeenCalledWith(testPosition + 10);
                     });
 
                 });

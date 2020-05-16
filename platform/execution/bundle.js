@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -21,25 +21,26 @@
  *****************************************************************************/
 
 define([
-    "./src/WorkerService",
-    'legacyRegistry'
+    "./src/WorkerService"
 ], function (
-    WorkerService,
-    legacyRegistry
+    WorkerService
 ) {
 
-    legacyRegistry.register("platform/execution", {
-        "extensions": {
-            "services": [
-                {
-                    "key": "workerService",
-                    "implementation": WorkerService,
-                    "depends": [
-                        "$window",
-                        "workers[]"
-                    ]
-                }
-            ]
+    return {
+        name:"platform/execution",
+        definition: {
+            "extensions": {
+                "services": [
+                    {
+                        "key": "workerService",
+                        "implementation": WorkerService,
+                        "depends": [
+                            "$window",
+                            "workers[]"
+                        ]
+                    }
+                ]
+            }
         }
-    });
+    };
 });

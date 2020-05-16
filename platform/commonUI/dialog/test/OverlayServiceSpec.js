@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -35,39 +35,44 @@ define(
                 mockTemplate,
                 mockElement,
                 mockScope,
+                mockTimeout,
                 overlayService;
 
             beforeEach(function () {
                 mockDocument = jasmine.createSpyObj("$document", ["find"]);
                 mockCompile = jasmine.createSpy("$compile");
                 mockRootScope = jasmine.createSpyObj("$rootScope", ["$new"]);
-                mockBody = jasmine.createSpyObj("body", ["prepend"]);
+                mockBody = jasmine.createSpyObj("body", ["append"]);
                 mockTemplate = jasmine.createSpy("template");
                 mockElement = jasmine.createSpyObj("element", ["remove"]);
                 mockScope = jasmine.createSpyObj("scope", ["$destroy"]);
+                mockTimeout = function (callback) {
+                    callback();
+                }
 
-                mockDocument.find.andReturn(mockBody);
-                mockCompile.andReturn(mockTemplate);
-                mockRootScope.$new.andReturn(mockScope);
-                mockTemplate.andReturn(mockElement);
+                mockDocument.find.and.returnValue(mockBody);
+                mockCompile.and.returnValue(mockTemplate);
+                mockRootScope.$new.and.returnValue(mockScope);
+                mockTemplate.and.returnValue(mockElement);
 
                 overlayService = new OverlayService(
                     mockDocument,
                     mockCompile,
-                    mockRootScope
+                    mockRootScope,
+                    mockTimeout
                 );
             });
 
             it("prepends an mct-include to create overlays", function () {
                 overlayService.createOverlay("test", {});
                 expect(mockCompile).toHaveBeenCalled();
-                expect(mockCompile.mostRecentCall.args[0].indexOf("mct-include"))
+                expect(mockCompile.calls.mostRecent().args[0].indexOf("mct-include"))
                     .not.toEqual(-1);
             });
 
             it("adds the templated element to the body", function () {
                 overlayService.createOverlay("test", {});
-                expect(mockBody.prepend).toHaveBeenCalledWith(mockElement);
+                expect(mockBody.append).toHaveBeenCalledWith(mockElement);
             });
 
             it("places the provided model/key in its template's scope", function () {

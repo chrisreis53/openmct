@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -26,7 +26,7 @@
  * @namespace platform/forms
  */
 define(
-    ["./controllers/FormController", "text!../res/templates/form.html"],
+    ["./controllers/FormController", "../res/templates/form.html"],
     function (FormController, formTemplate) {
 
         /**

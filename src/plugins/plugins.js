@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2020, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -23,23 +23,73 @@
 define([
     'lodash',
     './utcTimeSystem/plugin',
+    './localTimeSystem/plugin',
     '../../example/generator/plugin',
-    '../../platform/features/autoflow/plugin',
-    './timeConductor/plugin'
+    './autoflow/AutoflowTabularPlugin',
+    './timeConductor/plugin',
+    '../../example/imagery/plugin',
+    './imagery/plugin',
+    '../../platform/import-export/bundle',
+    './summaryWidget/plugin',
+    './URLIndicatorPlugin/URLIndicatorPlugin',
+    './telemetryMean/plugin',
+    './plot/plugin',
+    './telemetryTable/plugin',
+    './staticRootPlugin/plugin',
+    './notebook/plugin',
+    './displayLayout/plugin',
+    './folderView/plugin',
+    './flexibleLayout/plugin',
+    './tabs/plugin',
+    './LADTable/plugin',
+    './filters/plugin',
+    './objectMigration/plugin',
+    './goToOriginalAction/plugin',
+    './clearData/plugin',
+    './webPage/plugin',
+    './condition/plugin',
+    './conditionWidget/plugin',
+    './themes/espresso',
+    './themes/maelstrom',
+    './themes/snow'
 ], function (
     _,
     UTCTimeSystem,
+    LocalTimeSystem,
     GeneratorPlugin,
     AutoflowPlugin,
-    TimeConductorPlugin
+    TimeConductorPlugin,
+    ExampleImagery,
+    ImageryPlugin,
+    ImportExport,
+    SummaryWidget,
+    URLIndicatorPlugin,
+    TelemetryMean,
+    PlotPlugin,
+    TelemetryTablePlugin,
+    StaticRootPlugin,
+    Notebook,
+    DisplayLayoutPlugin,
+    FolderView,
+    FlexibleLayout,
+    Tabs,
+    LADTable,
+    Filters,
+    ObjectMigration,
+    GoToOriginalAction,
+    ClearData,
+    WebPagePlugin,
+    ConditionPlugin,
+    ConditionWidgetPlugin,
+    Espresso,
+    Maelstrom,
+    Snow
 ) {
     var bundleMap = {
-        CouchDB: 'platform/persistence/couch',
-        Elasticsearch: 'platform/persistence/elastic',
-        Espresso: 'platform/commonUI/themes/espresso',
         LocalStorage: 'platform/persistence/local',
         MyItems: 'platform/features/my-items',
-        Snow: 'platform/commonUI/themes/snow'
+        CouchDB: 'platform/persistence/couch',
+        Elasticsearch: 'platform/persistence/elastic'
     };
 
     var plugins = _.mapValues(bundleMap, function (bundleName, pluginName) {
@@ -51,6 +101,11 @@ define([
     });
 
     plugins.UTCTimeSystem = UTCTimeSystem;
+    plugins.LocalTimeSystem = LocalTimeSystem;
+
+    plugins.ImportExport = ImportExport;
+
+    plugins.StaticRootPlugin = StaticRootPlugin;
 
     /**
      * A tabular view showing the latest values of multiple telemetry points at
@@ -63,7 +118,7 @@ define([
      */
     plugins.AutoflowView = AutoflowPlugin;
 
-    plugins.Conductor = TimeConductorPlugin;
+    plugins.Conductor = TimeConductorPlugin.default;
 
     plugins.CouchDB = function (url) {
         return function (openmct) {
@@ -112,6 +167,31 @@ define([
     plugins.Generator = function () {
         return GeneratorPlugin;
     };
+
+    plugins.ExampleImagery = ExampleImagery;
+    plugins.ImageryPlugin = ImageryPlugin;
+    plugins.Plot = PlotPlugin;
+    plugins.TelemetryTable = TelemetryTablePlugin;
+
+    plugins.SummaryWidget = SummaryWidget;
+    plugins.TelemetryMean = TelemetryMean;
+    plugins.URLIndicator = URLIndicatorPlugin;
+    plugins.Notebook = Notebook.default;
+    plugins.DisplayLayout = DisplayLayoutPlugin.default;
+    plugins.FolderView = FolderView;
+    plugins.Tabs = Tabs;
+    plugins.FlexibleLayout = FlexibleLayout;
+    plugins.LADTable = LADTable;
+    plugins.Filters = Filters;
+    plugins.ObjectMigration = ObjectMigration.default;
+    plugins.GoToOriginalAction = GoToOriginalAction.default;
+    plugins.ClearData = ClearData;
+    plugins.WebPage = WebPagePlugin.default;
+    plugins.Espresso = Espresso.default;
+    plugins.Maelstrom = Maelstrom.default;
+    plugins.Snow = Snow.default;
+    plugins.Condition = ConditionPlugin.default;
+    plugins.ConditionWidget = ConditionWidgetPlugin.default;
 
     return plugins;
 });

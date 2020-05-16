@@ -1,5 +1,5 @@
 <!--
- Open MCT, Copyright (c) 2014-2017, United States Government
+ Open MCT, Copyright (c) 2014-2018, United States Government
  as represented by the Administrator of the National Aeronautics and Space
  Administration. All rights reserved.
 
@@ -20,7 +20,7 @@
  at runtime from the About dialog for additional information.
 -->
 <span ng-controller="DateTimeFieldController">
-    <input type="text"
+    <input type="text" autocorrect="off" spellcheck="false"
            ng-model="textValue"
            ng-blur="restoreTextValue(); ngBlur()"
            ng-mouseup="ngMouseup()"

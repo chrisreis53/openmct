@@ -34,13 +34,14 @@ define(
                 mockDomainObject,
                 mockActionCapability,
                 mockStart,
-                mockRestart,
+                mockPause,
+                mockStop,
                 testModel,
                 controller;
 
             function invokeWatch(expr, value) {
-                mockScope.$watch.calls.forEach(function (call) {
-                    if (call.args[0] ===  expr) {
+                mockScope.$watch.calls.all().forEach(function (call) {
+                    if (call.args[0] === expr) {
                         call.args[1](value);
                     }
                 });
@@ -67,26 +68,33 @@ define(
                     'start',
                     ['getMetadata', 'perform']
                 );
-                mockRestart = jasmine.createSpyObj(
-                    'restart',
+                mockPause = jasmine.createSpyObj(
+                    'paused',
+                    ['getMetadata', 'perform']
+                );
+                mockStop = jasmine.createSpyObj(
+                    'stopped',
                     ['getMetadata', 'perform']
                 );
                 mockNow = jasmine.createSpy('now');
 
-                mockDomainObject.getCapability.andCallFake(function (c) {
+                mockDomainObject.getCapability.and.callFake(function (c) {
                     return (c === 'action') && mockActionCapability;
                 });
-                mockDomainObject.getModel.andCallFake(function () {
+                mockDomainObject.getModel.and.callFake(function () {
                     return testModel;
                 });
-                mockActionCapability.getActions.andCallFake(function (k) {
+                mockActionCapability.getActions.and.callFake(function (k) {
                     return [{
                         'timer.start': mockStart,
-                        'timer.restart': mockRestart
+                        'timer.pause': mockPause,
+                        'timer.stop': mockStop
                     }[k]];
                 });
-                mockStart.getMetadata.andReturn({ cssClass: "icon-play", name: "Start" });
-                mockRestart.getMetadata.andReturn({ cssClass: "icon-refresh", name: "Restart" });
+
+                mockStart.getMetadata.and.returnValue({cssClass: "icon-play", name: "Start"});
+                mockPause.getMetadata.and.returnValue({cssClass: "icon-pause", name: "Pause"});
+                mockStop.getMetadata.and.returnValue({cssClass: "icon-box", name: "Stop"});
                 mockScope.domainObject = mockDomainObject;
 
                 testModel = {};
@@ -116,9 +124,10 @@ define(
             it("displays nothing when there is no target", function () {
                 // Notify that domain object is available via scope
                 invokeWatch('domainObject', mockDomainObject);
-                mockNow.andReturn(TEST_TIMESTAMP);
-                mockWindow.requestAnimationFrame.mostRecentCall.args[0]();
+                mockNow.and.returnValue(TEST_TIMESTAMP);
+                mockWindow.requestAnimationFrame.calls.mostRecent().args[0]();
                 expect(controller.sign()).toEqual("");
+                expect(controller.signClass()).toEqual("");
                 expect(controller.text()).toEqual("");
             });
 
@@ -128,68 +137,80 @@ define(
                 // Notify that domain object is available via scope
                 invokeWatch('domainObject', mockDomainObject);
 
-                mockNow.andReturn(TEST_TIMESTAMP + 121000);
-                mockWindow.requestAnimationFrame.mostRecentCall.args[0]();
+                mockNow.and.returnValue(TEST_TIMESTAMP + 121000);
+                mockWindow.requestAnimationFrame.calls.mostRecent().args[0]();
                 expect(controller.sign()).toEqual("+");
+                expect(controller.signClass()).toEqual("icon-plus");
                 expect(controller.text()).toEqual("0D 00:02:01");
 
-                mockNow.andReturn(TEST_TIMESTAMP - 121000);
-                mockWindow.requestAnimationFrame.mostRecentCall.args[0]();
+                mockNow.and.returnValue(TEST_TIMESTAMP - 121000);
+                mockWindow.requestAnimationFrame.calls.mostRecent().args[0]();
                 expect(controller.sign()).toEqual("-");
+                expect(controller.signClass()).toEqual("icon-minus");
                 expect(controller.text()).toEqual("0D 00:02:01");
 
-                mockNow.andReturn(TEST_TIMESTAMP);
-                mockWindow.requestAnimationFrame.mostRecentCall.args[0]();
+                mockNow.and.returnValue(TEST_TIMESTAMP);
+                mockWindow.requestAnimationFrame.calls.mostRecent().args[0]();
                 expect(controller.sign()).toEqual("");
+                expect(controller.signClass()).toEqual("");
                 expect(controller.text()).toEqual("0D 00:00:00");
             });
 
-            it("shows cssClass & name for the applicable start/restart action", function () {
+            it("shows cssClass & name for the applicable start/pause action", function () {
                 invokeWatch('domainObject', mockDomainObject);
                 expect(controller.buttonCssClass()).toEqual("icon-play");
                 expect(controller.buttonText()).toEqual("Start");
 
                 testModel.timestamp = 12321;
+                testModel.timerState = 'started';
                 invokeWatch('model.modified', 1);
-                expect(controller.buttonCssClass()).toEqual("icon-refresh");
-                expect(controller.buttonText()).toEqual("Restart");
+                expect(controller.buttonCssClass()).toEqual("icon-pause");
+                expect(controller.buttonText()).toEqual("Pause");
             });
 
-            it("performs correct start/restart action on click", function () {
+            it("performs correct start/pause/stop action on click", function () {
+                //test start
                 invokeWatch('domainObject', mockDomainObject);
                 expect(mockStart.perform).not.toHaveBeenCalled();
                 controller.clickButton();
                 expect(mockStart.perform).toHaveBeenCalled();
 
+                //test pause
                 testModel.timestamp = 12321;
+                testModel.timerState = 'started';
                 invokeWatch('model.modified', 1);
-                expect(mockRestart.perform).not.toHaveBeenCalled();
+                expect(mockPause.perform).not.toHaveBeenCalled();
                 controller.clickButton();
-                expect(mockRestart.perform).toHaveBeenCalled();
+                expect(mockPause.perform).toHaveBeenCalled();
+
+                //test stop
+                expect(mockStop.perform).not.toHaveBeenCalled();
+                controller.clickStopButton();
+                expect(mockStop.perform).toHaveBeenCalled();
             });
 
             it("stops requesting animation frames when destroyed", function () {
-                var initialCount = mockWindow.requestAnimationFrame.calls.length;
+                var initialCount = mockWindow.requestAnimationFrame.calls.count();
 
                 // First, check that normally new frames keep getting requested
-                mockWindow.requestAnimationFrame.mostRecentCall.args[0]();
-                expect(mockWindow.requestAnimationFrame.calls.length)
+                mockWindow.requestAnimationFrame.calls.mostRecent().args[0]();
+                expect(mockWindow.requestAnimationFrame.calls.count())
                     .toEqual(initialCount + 1);
-                mockWindow.requestAnimationFrame.mostRecentCall.args[0]();
-                expect(mockWindow.requestAnimationFrame.calls.length)
+                mockWindow.requestAnimationFrame.calls.mostRecent().args[0]();
+                expect(mockWindow.requestAnimationFrame.calls.count())
                     .toEqual(initialCount + 2);
 
                 // Now, verify that it stops after $destroy
-                expect(mockScope.$on.mostRecentCall.args[0])
+                expect(mockScope.$on.calls.mostRecent().args[0])
                     .toEqual('$destroy');
-                mockScope.$on.mostRecentCall.args[1]();
+                mockScope.$on.calls.mostRecent().args[1]();
 
                 // Frames should no longer get requested
-                mockWindow.requestAnimationFrame.mostRecentCall.args[0]();
-                expect(mockWindow.requestAnimationFrame.calls.length)
+                mockWindow.requestAnimationFrame.calls.mostRecent().args[0]();
+                expect(mockWindow.requestAnimationFrame.calls.count())
                     .toEqual(initialCount + 2);
-                mockWindow.requestAnimationFrame.mostRecentCall.args[0]();
-                expect(mockWindow.requestAnimationFrame.calls.length)
+                mockWindow.requestAnimationFrame.calls.mostRecent().args[0]();
+                expect(mockWindow.requestAnimationFrame.calls.count())
                     .toEqual(initialCount + 2);
             });
         });

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -25,8 +25,7 @@ define(
     function (InfoButtonGesture) {
 
         describe("The info button gesture", function () {
-            var mockTimeout,
-                mockDocument,
+            var mockDocument,
                 mockBody,
                 mockAgentService,
                 mockInfoService,
@@ -42,10 +41,9 @@ define(
                 fireDismissGesture;
 
             beforeEach(function () {
-                mockTimeout = jasmine.createSpy('$timeout');
                 mockDocument = jasmine.createSpyObj('$document', ['find']);
                 mockBody = jasmine.createSpyObj('body', ['on', 'off', 'scope', 'css', 'unbind']);
-                mockDocument.find.andReturn(mockBody);
+                mockDocument.find.and.returnValue(mockBody);
                 mockAgentService = jasmine.createSpyObj('agentService', ['isMobile', 'isPhone']);
                 mockInfoService = jasmine.createSpyObj(
                     'infoService',
@@ -68,14 +66,14 @@ define(
                 testMetadata = [{ name: "Test name", value: "Test value" }];
                 mockHide = jasmine.createSpy('hide');
 
-                mockDomainObject.getModel.andReturn({ name: "Test Object" });
-                mockDomainObject.useCapability.andCallFake(function (c) {
+                mockDomainObject.getModel.and.returnValue({ name: "Test Object" });
+                mockDomainObject.useCapability.and.callFake(function (c) {
                     return (c === 'metadata') ? testMetadata : undefined;
                 });
-                mockElement.scope.andReturn(mockScope);
-                mockScope.$on.andReturn(mockOff);
-                mockInfoService.display.andReturn(mockHide);
-                mockAgentService.isMobile.andReturn(true);
+                mockElement.scope.and.returnValue(mockScope);
+                mockScope.$on.and.returnValue(mockOff);
+                mockInfoService.display.and.returnValue(mockHide);
+                mockAgentService.isMobile.and.returnValue(true);
                 gesture = new InfoButtonGesture(
                     mockDocument,
                     mockAgentService,
@@ -83,7 +81,7 @@ define(
                     mockElement,
                     mockDomainObject
                 );
-                fireGesture =  mockElement.on.mostRecentCall.args[1];
+                fireGesture =  mockElement.on.calls.mostRecent().args[1];
             });
 
             it("expect click on the representation", function () {
@@ -106,7 +104,7 @@ define(
 
                 // Get the touch start on the body
                 // and fire the dismiss gesture
-                fireDismissGesture =  mockBody.on.mostRecentCall.args[1];
+                fireDismissGesture =  mockBody.on.calls.mostRecent().args[1];
                 fireDismissGesture(mockEvent);
                 // Expect Body to have been touched, event.preventDefault()
                 // to be called, then the mockBody listener to be detached

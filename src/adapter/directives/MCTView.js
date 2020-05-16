@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -21,18 +21,23 @@
  *****************************************************************************/
 
 define([
-    'angular',
-    './Region'
 ], function (
-    angular,
-    Region
 ) {
-    function MCTView() {
+    function MCTView(openmct) {
         return {
-            restrict: 'A',
+            restrict: 'E',
             link: function (scope, element, attrs) {
-                var region = new Region(element[0]);
-                scope.$watch(attrs.mctView, region.show.bind(region));
+                var provider = openmct.objectViews.getByProviderKey(attrs.mctProviderKey);
+                var view = new provider.view(scope.domainObject.useCapability('adapter'));
+                var domElement = element[0];
+
+                view.show(domElement);
+
+                if (view.destroy) {
+                    scope.$on('$destroy', function () {
+                        view.destroy(domElement);
+                    });
+                }
             }
         };
     }

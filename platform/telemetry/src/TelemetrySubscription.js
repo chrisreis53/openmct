@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -190,8 +190,8 @@ define(
                 // telemetry-capable objects may be an asynchronous operation.)
                 self.telemetryObjectPromise = promiseRelevantObjects(domainObject);
                 self.unsubscribePromise = self.telemetryObjectPromise
-                        .then(cacheObjectReferences)
-                        .then(subscribeAll);
+                    .then(cacheObjectReferences)
+                    .then(subscribeAll);
             }
 
             function idsMatch(ids) {
@@ -292,8 +292,8 @@ define(
             var id = domainObject.getId(),
                 latestValue = this.latestValues[id];
             return latestValue && (key ?
-                                   latestValue.datum[key] :
-                                   latestValue.domain);
+                latestValue.datum[key] :
+                latestValue.domain);
         };
 
         /**
@@ -315,8 +315,8 @@ define(
             var id = domainObject.getId(),
                 latestValue = this.latestValues[id];
             return latestValue && (key ?
-                                   latestValue.datum[key] :
-                                   latestValue.range);
+                latestValue.datum[key] :
+                latestValue.range);
         };
 
         /**

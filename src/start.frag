@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -18,15 +18,15 @@
  * licenses. See the Open Source Licenses file (LICENSES.md) included with
  * this source code distribution or the Licensing information page available
  * at runtime from the About dialog for additional information.
- *****************************************************************************/
-
-/**
+ *
  * Open MCT https://nasa.github.io/openmct/
- * Version @@version
- * Built @@timestamp
- * Revision @@revision
- * Branch @@branch
- */
+ * Version: @@version
+ * Built: @@timestamp
+ * Revision: @@revision
+ * Branch: @@branch
+ *
+ * @preserve
+ *****************************************************************************/
 
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
@@ -37,3 +37,9 @@
         root.openmct = factory();
     }
 }(this, function() {
+    var BUILD_CONSTANTS = {
+        version: "@@version",
+        timestamp: "@@timestamp",
+        revision: "@@revision",
+        branch: "@@branch"
+    };

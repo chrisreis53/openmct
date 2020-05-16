@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -81,7 +81,7 @@ define(
         WorkerService.prototype.run = function (key) {
             var scriptUrl = this.workerUrls[key],
                 Worker = this.sharedWorkers[key] ?
-                        this.SharedWorker : this.Worker;
+                    this.SharedWorker : this.Worker;
             return scriptUrl && Worker && new Worker(scriptUrl);
         };
 

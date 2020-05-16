@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -351,7 +351,7 @@ define(
                  */
                 getResponse: function getResponse(arg) {
                     var id = arg && (typeof arg === 'string' ?
-                            arg : arg.getId());
+                        arg : arg.getId());
 
                     if (id) {
                         return (self.response[id] || {}).data;

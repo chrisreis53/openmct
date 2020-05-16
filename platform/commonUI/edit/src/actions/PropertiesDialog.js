@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -49,7 +49,7 @@ define(
                     name: "Properties",
                     rows: this.properties.map(function (property, index) {
                         // Property definition is same as form row definition
-                        var row = Object.create(property.getDefinition());
+                        var row = JSON.parse(JSON.stringify(property.getDefinition()));
                         row.key = index;
                         return row;
                     }).filter(function (row) {

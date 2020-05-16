@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -25,50 +25,52 @@ define([
     "./src/CompositionMutabilityPolicy",
     "./src/CompositionModelPolicy",
     "./src/ComposeActionPolicy",
-    "./src/PersistableCompositionPolicy",
-    'legacyRegistry'
+    "./src/PersistableCompositionPolicy"
 ], function (
     CompositionPolicy,
     CompositionMutabilityPolicy,
     CompositionModelPolicy,
     ComposeActionPolicy,
-    PersistableCompositionPolicy,
-    legacyRegistry
+    PersistableCompositionPolicy
 ) {
 
-    legacyRegistry.register("platform/containment", {
-        "extensions": {
-            "policies": [
-                {
-                    "category": "composition",
-                    "implementation": CompositionPolicy,
-                    "message": "Objects of this type cannot contain objects of that type."
-                },
-                {
-                    "category": "composition",
-                    "implementation": CompositionMutabilityPolicy,
-                    "message": "Objects of this type cannot be modified."
-                },
-                {
-                    "category": "composition",
-                    "implementation": CompositionModelPolicy,
-                    "message": "Objects of this type cannot contain other objects."
-                },
-                {
-                    "category": "action",
-                    "implementation": ComposeActionPolicy,
-                    "depends": [
-                        "$injector"
-                    ],
-                    "message": "Objects of this type cannot contain objects of that type."
-                },
-                {
-                    "category": "composition",
-                    "implementation": PersistableCompositionPolicy,
-                    "depends": ["openmct"],
-                    "message": "Change cannot be made to composition of non-persistable object"
-                }
-            ]
+    return {
+        name:"platform/containment",
+        definition: {
+            "extensions": {
+                "policies": [
+                    {
+                        "category": "composition",
+                        "implementation": CompositionPolicy,
+                        "message": "Objects of this type cannot contain objects of that type."
+                    },
+                    {
+                        "category": "composition",
+                        "implementation": CompositionMutabilityPolicy,
+                        "message": "Objects of this type cannot be modified."
+                    },
+                    {
+                        "category": "composition",
+                        "implementation": CompositionModelPolicy,
+                        "message": "Objects of this type cannot contain other objects."
+                    },
+                    {
+                        "category": "action",
+                        "implementation": ComposeActionPolicy,
+                        "depends": [
+                            "$injector",
+                            "openmct"
+                        ],
+                        "message": "Objects of this type cannot contain objects of that type."
+                    },
+                    {
+                        "category": "composition",
+                        "implementation": PersistableCompositionPolicy,
+                        "depends": ["openmct"],
+                        "message": "Change cannot be made to composition of non-persistable object"
+                    }
+                ]
+            }
         }
-    });
+    };
 });

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -62,7 +62,7 @@ define(
         CompositionCapability.prototype.add = function (domainObject, index) {
             var self = this,
                 id = typeof domainObject === 'string' ?
-                        domainObject : domainObject.getId(),
+                    domainObject : domainObject.getId(),
                 model = self.domainObject.getModel(),
                 composition = model.composition,
                 oldIndex = composition.indexOf(id);
@@ -104,7 +104,7 @@ define(
             }
 
             return this.domainObject.useCapability('mutation', addIdToModel)
-                    .then(contextualize);
+                .then(contextualize);
         };
 
         /**

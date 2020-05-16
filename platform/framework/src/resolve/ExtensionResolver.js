@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -60,8 +60,8 @@ define(
 
             function loadImplementation(ext) {
                 var implPromise = ext.hasImplementationValue() ?
-                            Promise.resolve(ext.getImplementationValue()) :
-                            loader.load(ext.getImplementationPath()),
+                        Promise.resolve(ext.getImplementationValue()) :
+                        loader.load(ext.getImplementationPath()),
                     definition = ext.getDefinition();
 
                 // Wrap a constructor function (to avoid modifying the original)

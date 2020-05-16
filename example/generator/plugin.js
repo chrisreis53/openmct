@@ -23,82 +23,116 @@
 
 define([
     "./GeneratorProvider",
-    "./SinewaveLimitCapability"
+    "./SinewaveLimitProvider",
+    "./StateGeneratorProvider",
+    "./GeneratorMetadataProvider"
 ], function (
     GeneratorProvider,
-    SinewaveLimitCapability
+    SinewaveLimitProvider,
+    StateGeneratorProvider,
+    GeneratorMetadataProvider
 ) {
 
-    var legacyExtensions = {
-        "capabilities": [
-            {
-                "key": "limit",
-                "implementation": SinewaveLimitCapability
-            }
-        ]
-    };
+    return function (openmct) {
 
-    return function(openmct){
-        //Register legacy extensions for things not yet supported by the new API
-        Object.keys(legacyExtensions).forEach(function (type){
-            var extensionsOfType = legacyExtensions[type];
-            extensionsOfType.forEach(function (extension) {
-                openmct.legacyExtension(type, extension)
-            })
+        openmct.types.addType("example.state-generator", {
+            name: "State Generator",
+            description: "For development use.  Generates test enumerated telemetry by cycling through a given set of states",
+            cssClass: "icon-generator-telemetry",
+            creatable: true,
+            form: [
+                {
+                    name: "State Duration (seconds)",
+                    control: "numberfield",
+                    cssClass: "l-input-sm l-numeric",
+                    key: "duration",
+                    required: true,
+                    property: [
+                        "telemetry",
+                        "duration"
+                    ]
+                }
+            ],
+            initialize: function (object) {
+                object.telemetry = {
+                    duration: 5
+                }
+            }
         });
+
+        openmct.telemetry.addProvider(new StateGeneratorProvider());
+
         openmct.types.addType("generator", {
             name: "Sine Wave Generator",
             description: "For development use. Generates example streaming telemetry data using a simple sine wave algorithm.",
-            cssClass: "icon-telemetry",
+            cssClass: "icon-generator-telemetry",
             creatable: true,
             form: [
                 {
                     name: "Period",
-                    control: "textfield",
+                    control: "numberfield",
                     cssClass: "l-input-sm l-numeric",
                     key: "period",
                     required: true,
                     property: [
                         "telemetry",
                         "period"
-                    ],
-                    pattern: "^\\d*(\\.\\d*)?$"
+                    ]
                 },
                 {
                     name: "Amplitude",
-                    control: "textfield",
+                    control: "numberfield",
                     cssClass: "l-input-sm l-numeric",
                     key: "amplitude",
                     required: true,
                     property: [
                         "telemetry",
                         "amplitude"
-                    ],
-                    pattern: "^\\d*(\\.\\d*)?$"
+                    ]
                 },
                 {
                     name: "Offset",
-                    control: "textfield",
+                    control: "numberfield",
                     cssClass: "l-input-sm l-numeric",
                     key: "offset",
                     required: true,
                     property: [
                         "telemetry",
                         "offset"
-                    ],
-                    pattern: "^\\d*(\\.\\d*)?$"
+                    ]
                 },
                 {
                     name: "Data Rate (hz)",
-                    control: "textfield",
+                    control: "numberfield",
                     cssClass: "l-input-sm l-numeric",
                     key: "dataRateInHz",
                     required: true,
                     property: [
                         "telemetry",
                         "dataRateInHz"
-                    ],
-                    pattern: "^\\d*(\\.\\d*)?$"
+                    ]
+                },
+                {
+                    name: "Phase (radians)",
+                    control: "numberfield",
+                    cssClass: "l-input-sm l-numeric",
+                    key: "phase",
+                    required: true,
+                    property: [
+                        "telemetry",
+                        "phase"
+                    ]
+                },
+                {
+                    name: "Randomness",
+                    control: "numberfield",
+                    cssClass: "l-input-sm l-numeric",
+                    key: "randomness",
+                    required: true,
+                    property: [
+                        "telemetry",
+                        "randomness"
+                    ]
                 }
             ],
             initialize: function (object) {
@@ -107,42 +141,15 @@ define([
                     amplitude: 1,
                     offset: 0,
                     dataRateInHz: 1,
-                    values: [
-                        {
-                            key: "utc",
-                            name: "Time",
-                            format: "utc",
-                            hints: {
-                                domain: 1
-                            }
-                        },
-                        {
-                            key: "yesterday",
-                            name: "Yesterday",
-                            format: "utc",
-                            hints: {
-                                domain: 2
-                            }
-                        },
-                        {
-                            key: "sin",
-                            name: "Sine",
-                            hints: {
-                                range: 1
-                            }
-                        },
-                        {
-                            key: "cos",
-                            name: "Cosine",
-                            hints: {
-                                range: 2
-                            }
-                        }
-                    ]
+                    phase: 0,
+                    randomness: 0
                 };
             }
         });
+
         openmct.telemetry.addProvider(new GeneratorProvider());
+        openmct.telemetry.addProvider(new GeneratorMetadataProvider());
+        openmct.telemetry.addProvider(new SinewaveLimitProvider());
     };
 
 });

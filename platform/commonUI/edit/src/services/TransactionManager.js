@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -77,14 +77,19 @@ define([], function () {
                 return promiseFn().then(nextFn);
             };
         }
-
-        if (!this.isScheduled(id)) {
-            this.clearTransactionFns[id] =
-                this.transactionService.addToTransaction(
-                    chain(onCommit, release),
-                    chain(onCancel, release)
-                );
+        /**
+         * Clear any existing persistence calls for object with given ID. This ensures only the most recent persistence
+         * call is executed. This should prevent stale objects being persisted and overwriting fresh ones.
+         */
+        if (this.isScheduled(id)) {
+            this.clearTransactionsFor(id);
         }
+
+        this.clearTransactionFns[id] =
+            this.transactionService.addToTransaction(
+                chain(onCommit, release),
+                chain(onCancel, release)
+            );
     };
 
     /**

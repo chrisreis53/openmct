@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -22,14 +22,14 @@
 
 define([
     'zepto',
-    'text!../../res/templates/tree/node.html',
+    '../../res/templates/tree/node.html',
     './ToggleView',
     './TreeLabelView'
 ], function ($, nodeTemplate, ToggleView, TreeLabelView) {
 
-    function TreeNodeView(gestureService, subtreeFactory, selectFn) {
-        this.li = $('<li>');
-
+    function TreeNodeView(gestureService, subtreeFactory, selectFn, openmct) {
+        this.li = $('<li class="c-tree__item-h">');
+        this.openmct = openmct;
         this.statusClasses = [];
 
         this.toggleView = new ToggleView(false);
@@ -38,7 +38,7 @@ define([
                 if (!this.subtreeView) {
                     this.subtreeView = subtreeFactory();
                     this.subtreeView.model(this.activeObject);
-                    this.li.find('.tree-item-subtree').eq(0)
+                    this.li.find('.c-tree__item-subtree').eq(0)
                         .append($(this.subtreeView.elements()));
                 }
                 $(this.subtreeView.elements()).removeClass('hidden');
@@ -81,11 +81,14 @@ define([
         }
 
         this.activeObject = domainObject;
-
-        if (domainObject && domainObject.hasCapability('composition')) {
-            $(this.toggleView.elements()).addClass('has-children');
-        } else {
-            $(this.toggleView.elements()).removeClass('has-children');
+        if (domainObject && domainObject.hasCapability('adapter')) {
+            var obj = domainObject.useCapability('adapter');
+            var hasComposition =  this.openmct.composition.get(obj) !== undefined;
+            if (hasComposition) {
+                $(this.toggleView.elements()).addClass('is-enabled');
+            } else {
+                $(this.toggleView.elements()).removeClass('is-enabled');
+            }
         }
 
         if (domainObject && domainObject.hasCapability('status')) {
@@ -117,7 +120,7 @@ define([
             selectedIdPath = getIdPath(domainObject);
 
         if (this.onSelectionPath) {
-            this.li.find('.tree-item').eq(0).removeClass('selected');
+            this.li.find('.js-tree__item').eq(0).removeClass('is-selected');
             if (this.subtreeView) {
                 this.subtreeView.value(undefined);
             }
@@ -133,7 +136,7 @@ define([
 
         if (this.onSelectionPath) {
             if (activeIdPath.length === selectedIdPath.length) {
-                this.li.find('.tree-item').eq(0).addClass('selected');
+                this.li.find('.js-tree__item').eq(0).addClass('is-selected');
             } else {
                 // Expand to reveal the selection
                 this.toggleView.value(true);
@@ -149,7 +152,6 @@ define([
     TreeNodeView.prototype.elements = function () {
         return this.li;
     };
-
 
     return TreeNodeView;
 });

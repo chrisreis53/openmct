@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -90,13 +90,21 @@ define(['./Type'], function (Type) {
     /**
      * Retrieve a registered type by its key.
      * @method get
-     * @param {string} typeKey the key for htis type
+     * @param {string} typeKey the key for this type
      * @memberof module:openmct.TypeRegistry#
      * @returns {module:openmct.Type} the registered type
      */
     TypeRegistry.prototype.get = function (typeKey) {
         return this.types[typeKey];
     };
+
+    TypeRegistry.prototype.importLegacyTypes = function (types) {
+        types.filter((t) => !this.get(t.key))
+            .forEach((type) => {
+                let def = Type.definitionFromLegacyDefinition(type);
+                this.addType(type.key, def);
+            });
+    }
 
     return TypeRegistry;
 });

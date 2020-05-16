@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -21,8 +21,10 @@
  *****************************************************************************/
 
 define([
+    './object-utils.js',
     'lodash'
 ], function (
+    utils,
     _
 ) {
     var ANY_OBJECT_EVENT = "mutation";
@@ -41,13 +43,16 @@ define([
     }
 
     function qualifiedEventName(object, eventName) {
-        return [object.identifier.key, eventName].join(':');
+        var keystring = utils.makeKeyString(object.identifier);
+
+        return [keystring, eventName].join(':');
     }
 
     MutableObject.prototype.stopListening = function () {
         this.unlisteners.forEach(function (unlisten) {
             unlisten();
         });
+        this.unlisteners = [];
     };
 
     /**
@@ -75,17 +80,22 @@ define([
      * @memberof module:openmct.MutableObject#
      */
     MutableObject.prototype.set = function (path, value) {
-
         _.set(this.object, path, value);
         _.set(this.object, 'modified', Date.now());
 
-        //Emit event specific to property
-        this.eventEmitter.emit(qualifiedEventName(this.object, path), value);
-        //Emit wildcare event
-        this.eventEmitter.emit(qualifiedEventName(this.object, '*'), this.object);
+        var handleRecursiveMutation = function (newObject) {
+            this.object = newObject;
+        }.bind(this);
 
+        //Emit wildcard event
+        this.eventEmitter.emit(qualifiedEventName(this.object, '*'), this.object);
         //Emit a general "any object" event
         this.eventEmitter.emit(ANY_OBJECT_EVENT, this.object);
+
+        this.eventEmitter.on(qualifiedEventName(this.object, '*'), handleRecursiveMutation);
+        //Emit event specific to property
+        this.eventEmitter.emit(qualifiedEventName(this.object, path), value);
+        this.eventEmitter.off(qualifiedEventName(this.object, '*'), handleRecursiveMutation);
     };
 
     return MutableObject;

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -50,11 +50,18 @@ define([
         this.rootProvider = new RootObjectProvider(this.rootRegistry);
     }
 
+    /**
+     * Set fallback provider, this is an internal API for legacy reasons.
+     * @private
+     */
     ObjectAPI.prototype.supersecretSetFallbackProvider = function (p) {
         this.fallbackProvider = p;
     };
 
-    // Retrieve the provider for a given key.
+    /**
+     * Retrieve the provider for a given identifier.
+     * @private
+     */
     ObjectAPI.prototype.getProvider = function (identifier) {
         if (identifier.key === 'ROOT') {
             return this.rootProvider;
@@ -135,27 +142,28 @@ define([
      * @returns {Promise} a promise which will resolve when the domain object
      *          has been saved, or be rejected if it cannot be saved
      */
+    ObjectAPI.prototype.get = function (identifier) {
+        identifier = utils.parseKeyString(identifier);
+        var provider = this.getProvider(identifier);
 
-    [
-        'save',
-        'delete',
-        'get'
-    ].forEach(function (method) {
-        ObjectAPI.prototype[method] = function () {
-            var identifier = arguments[0],
-                provider = this.getProvider(identifier);
+        if (!provider) {
+            throw new Error('No Provider Matched');
+        }
 
-            if (!provider) {
-                throw new Error('No Provider Matched');
-            }
+        if (!provider.get) {
+            throw new Error('Provider does not support get!');
+        }
 
-            if (!provider[method]) {
-                throw new Error('Provider does not support [' + method + '].');
-            }
+        return provider.get(identifier);
+    };
 
-            return provider[method].apply(provider, arguments);
-        };
-    });
+    ObjectAPI.prototype.delete = function () {
+        throw new Error('Delete not implemented');
+    };
+
+    ObjectAPI.prototype.save = function () {
+        throw new Error('Save not implemented');
+    };
 
     /**
      * Add a root-level object.
@@ -197,6 +205,40 @@ define([
             new MutableObject(this.eventEmitter, domainObject);
         mutableObject.on(path, callback);
         return mutableObject.stopListening.bind(mutableObject);
+    };
+
+    /**
+     * @param {module:openmct.ObjectAPI~Identifier} identifier
+     * @returns {string} A string representation of the given identifier, including namespace and key
+     */
+    ObjectAPI.prototype.makeKeyString = function (identifier) {
+        return utils.makeKeyString(identifier);
+    };
+
+    /**
+     * Given any number of identifiers, will return true if they are all equal, otherwise false.
+     * @param {module:openmct.ObjectAPI~Identifier[]} identifiers
+     */
+    ObjectAPI.prototype.areIdsEqual = function (...identifiers) {
+        return identifiers.map(utils.parseKeyString)
+            .every(identifier => {
+                return identifier === identifiers[0] ||
+                    (identifier.namespace === identifiers[0].namespace &&
+                        identifier.key === identifiers[0].key);
+            });
+    };
+
+    ObjectAPI.prototype.getOriginalPath = function (identifier, path = []) {
+        return this.get(identifier).then((domainObject) => {
+            path.push(domainObject);
+            let location = domainObject.location;
+
+            if (location) {
+                return this.getOriginalPath(utils.parseKeyString(location), path);
+            } else {
+                return path;
+            }
+        });
     };
 
     /**

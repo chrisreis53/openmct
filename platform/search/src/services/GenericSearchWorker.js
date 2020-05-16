@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -30,7 +30,7 @@
     // An array of objects composed of domain object IDs and models
     // {id: domainObject's ID, model: domainObject's model}
     var indexedItems = [],
-        TERM_SPLITTER = /[ _\*]/;
+        TERM_SPLITTER = /[ _*]/;
 
     function indexItem(id, model) {
         var vector = {
@@ -50,8 +50,8 @@
     // Helper function for search()
     function convertToTerms(input) {
         var query = {
-                exactInput: input
-            };
+            exactInput: input
+        };
         query.inputClean = input.trim();
         query.inputLowerCase = query.inputClean.toLocaleLowerCase();
         query.terms = query.inputLowerCase.split(TERM_SPLITTER);

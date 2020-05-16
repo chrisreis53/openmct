@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -60,25 +60,25 @@ define(
                     'body',
                     ['addClass']
                 );
-                mockDocument.find.andCallFake(function (sel) {
+                mockDocument.find.and.callFake(function (sel) {
                     return sel === 'body' && mockBody;
                 });
                 AGENT_SERVICE_METHODS.forEach(function (m) {
-                    mockAgentService[m].andReturn(false);
+                    mockAgentService[m].and.returnValue(false);
                 });
             });
 
             TEST_PERMUTATIONS.forEach(function (trueMethods) {
                 var summary = trueMethods.length === 0 ?
-                        "device has no detected characteristics" :
-                        "device " + (trueMethods.join(", "));
+                    "device has no detected characteristics" :
+                    "device " + (trueMethods.join(", "));
 
                 describe("when " + summary, function () {
-                    var classifier;
+                    var classifier; // eslint-disable-line
 
                     beforeEach(function () {
                         trueMethods.forEach(function (m) {
-                            mockAgentService[m].andReturn(true);
+                            mockAgentService[m].and.returnValue(true);
                         });
                         classifier = new DeviceClassifier(
                             mockAgentService,

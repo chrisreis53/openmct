@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -25,25 +25,32 @@ define([
     './objects/ObjectAPI',
     './composition/CompositionAPI',
     './types/TypeRegistry',
-    './ui/Dialog',
-    './ui/GestureAPI',
-    './telemetry/TelemetryAPI'
+    './telemetry/TelemetryAPI',
+    './indicators/IndicatorAPI',
+    './notifications/NotificationAPI',
+    './contextMenu/ContextMenuAPI',
+    './Editor'
+
 ], function (
     TimeAPI,
     ObjectAPI,
     CompositionAPI,
     TypeRegistry,
-    Dialog,
-    GestureAPI,
-    TelemetryAPI
+    TelemetryAPI,
+    IndicatorAPI,
+    NotificationAPI,
+    ContextMenuAPI,
+    EditorAPI
 ) {
     return {
         TimeAPI: TimeAPI,
         ObjectAPI: ObjectAPI,
         CompositionAPI: CompositionAPI,
-        Dialog: Dialog,
         TypeRegistry: TypeRegistry,
-        GestureAPI: GestureAPI,
-        TelemetryAPI: TelemetryAPI
+        TelemetryAPI: TelemetryAPI,
+        IndicatorAPI: IndicatorAPI,
+        NotificationAPI: NotificationAPI.default,
+        EditorAPI: EditorAPI,
+        ContextMenuRegistry: ContextMenuAPI.default
     };
 });

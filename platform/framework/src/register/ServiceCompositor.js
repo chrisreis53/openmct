@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -64,6 +64,21 @@ define(
             function warn(extension, category, message) {
                 var msg = message || "No service provided by";
                 $log.warn([
+                    msg,
+                    " ",
+                    category,
+                    " ",
+                    extension.key,
+                    " from bundle ",
+                    (extension.bundle || { path: "unknown bundle" }).path,
+                    "; skipping."
+                ].join(""));
+            }
+
+            //Log an info: defaults to "no service provide by"
+            function info(extension, category, message) {
+                var msg = message || "No service provided by";
+                $log.info([
                     msg,
                     " ",
                     category,
@@ -161,13 +176,13 @@ define(
                     name = makeName("aggregator", service, index);
 
                 if (!service) {
-                    return warn(aggregator, "aggregator");
+                    return info(aggregator, "aggregator");
                 }
 
                 // Aggregators need other services to aggregate, otherwise they
                 // do nothing.
                 if (!latest[service]) {
-                    return warn(
+                    return info(
                         aggregator,
                         "aggregator",
                         "No services to aggregate for"

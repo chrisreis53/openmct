@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -46,7 +46,7 @@ define(
                 // tree is opened in a new tab using the
                 // context menu
                 mockContextSelected = jasmine.createSpyObj("context", ["selectedObject",
-                                                               "domainObject"]);
+                    "domainObject"]);
 
                 // Mocks the urlService used to make the new tab's url from a
                 // domainObject and mode
@@ -54,11 +54,11 @@ define(
 
                 // Action done using the current context or mockContextCurrent
                 actionCurrent = new NewTabAction(mockUrlService, mockWindow,
-                                                 mockContextCurrent);
+                    mockContextCurrent);
 
                 // Action done using the selected context or mockContextSelected
                 actionSelected = new NewTabAction(mockUrlService, mockWindow,
-                                                  mockContextSelected);
+                    mockContextSelected);
 
             });
 

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -23,40 +23,41 @@
 define([
     "./src/StatusRepresenter",
     "./src/StatusCapability",
-    "./src/StatusService",
-    'legacyRegistry'
+    "./src/StatusService"
 ], function (
     StatusRepresenter,
     StatusCapability,
-    StatusService,
-    legacyRegistry
+    StatusService
 ) {
 
-    legacyRegistry.register("platform/status", {
-        "extensions": {
-            "representers": [
-                {
-                    "implementation": StatusRepresenter
-                }
-            ],
-            "capabilities": [
-                {
-                    "key": "status",
-                    "implementation": StatusCapability,
-                    "depends": [
-                        "statusService"
-                    ]
-                }
-            ],
-            "services": [
-                {
-                    "key": "statusService",
-                    "implementation": StatusService,
-                    "depends": [
-                        "topic"
-                    ]
-                }
-            ]
+    return {
+        name:"platform/status",
+        definition: {
+            "extensions": {
+                "representers": [
+                    {
+                        "implementation": StatusRepresenter
+                    }
+                ],
+                "capabilities": [
+                    {
+                        "key": "status",
+                        "implementation": StatusCapability,
+                        "depends": [
+                            "statusService"
+                        ]
+                    }
+                ],
+                "services": [
+                    {
+                        "key": "statusService",
+                        "implementation": StatusService,
+                        "depends": [
+                            "topic"
+                        ]
+                    }
+                ]
+            }
         }
-    });
+    };
 });

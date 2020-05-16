@@ -1,9 +1,0 @@
-<div ng-controller="navballController">
-  <div id="navball"><navball-directive></navball-directive></div>
-  <ul>
-    <div ng-repeat="telemetryObject in telemetryObjects">
-      <mct-representation key="'label'" mct-object="telemetryObject"></mct-representation>
-      <b>{{getValue(telemetryObject)}}</b>
-    </div>
-  </ul>
-</div>
